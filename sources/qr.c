@@ -33,16 +33,16 @@
 
 
 // Function prototypes
-static void doBasicDemo (char *text);
-static void printQr(const uint8_t qrcode[]);
+static void createQRcode (char *text, uint16_t nb);
+static void printQr(const uint8_t qrcode[], char *file);
 
 
 // The main application program.
 int main (int argc, char **argv) {
-    int i ;
+    uint8_t i ;
     if (argc > 1) {
         for (i = 1 ; i < argc ; ++i) {
-            doBasicDemo(argv[i]);
+            createQRcode(argv[i], i);
         }
     } else {
         printf("No arguments given\n") ;
@@ -52,11 +52,9 @@ int main (int argc, char **argv) {
 }
 
 
-
-/*---- Demo suite ----*/
-
-// Creates a single QR Code, then prints it to the console.
-static void doBasicDemo (char *text) {
+// Creates a single QR Code, then prints it to the console and in a file.
+static void createQRcode (char *text, uint16_t nb) {
+    char fileName[30] = "" ;
 	enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;  // Error correction level
 
 	// Make and print the QR Code symbol
@@ -64,17 +62,16 @@ static void doBasicDemo (char *text) {
 	uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
 	bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
 		qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
-	if (ok)
-		printQr(qrcode);
+	if (ok) {
+        sprintf(fileName, "qrCode-%d.txt", nb) ;
+		printQr(qrcode, fileName);
+    }
 }
 
 
-
-/*---- Utilities ----*/
-
 // Prints the given QR Code to the console.
-static void printQr(const uint8_t qrcode[]) {
-    FILE *qr = fopen("qrCode.txt", "w");
+static void printQr(const uint8_t qrcode[], char *file) {
+    FILE *qr = fopen(file, "w");
     if(qr == NULL)
         return ;
 
@@ -82,9 +79,12 @@ static void printQr(const uint8_t qrcode[]) {
     int border = 4;
     for (int y = -border; y < size + border; y++) {
         for (int x = -border; x < size + border; x++) {
+            fputs((qrcodegen_getModule(qrcode, x, y) ? "##" : "  "), stdout);
             fputs((qrcodegen_getModule(qrcode, x, y) ? "##" : "  "), qr);
         }
+        fputs("\n", stdout);
         fputs("\n", qr);
     }
+    fputs("\n", stdout);
     fputs("\n", qr);
 }
