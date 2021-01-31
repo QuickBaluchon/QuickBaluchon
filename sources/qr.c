@@ -74,13 +74,17 @@ static void doBasicDemo (char *text) {
 
 // Prints the given QR Code to the console.
 static void printQr(const uint8_t qrcode[]) {
-	int size = qrcodegen_getSize(qrcode);
-	int border = 4;
-	for (int y = -border; y < size + border; y++) {
-		for (int x = -border; x < size + border; x++) {
-			fputs((qrcodegen_getModule(qrcode, x, y) ? "##" : "  "), stdout);
-		}
-		fputs("\n", stdout);
-	}
-	fputs("\n", stdout);
+    FILE *qr = fopen("qrCode.txt", "w");
+    if(qr == NULL)
+        return ;
+
+    int size = qrcodegen_getSize(qrcode);
+    int border = 4;
+    for (int y = -border; y < size + border; y++) {
+        for (int x = -border; x < size + border; x++) {
+            fputs((qrcodegen_getModule(qrcode, x, y) ? "##" : "  "), qr);
+        }
+        fputs("\n", qr);
+    }
+    fputs("\n", qr);
 }
