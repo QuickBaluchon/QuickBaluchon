@@ -6,9 +6,10 @@
 #include <xlsxwriter.h>
 #include <stdint.h>
 #include <gtk/gtk.h>
-#include <regex.h>
+#include <time.h>
 
 typedef struct UserData {
+    uint8_t id ;
     char name[30] ;
     char password[30] ;
 } UserData ;
@@ -20,7 +21,7 @@ typedef struct PkgInputs {
   GtkWidget *width ;
   GtkWidget *emailRecipient ;
   GtkWidget *addressRecipient;
-  GtkWidget *delai ;
+  GtkWidget *delay ;
 } PkgInputs ;
 
 typedef struct PkgData {
@@ -30,7 +31,7 @@ typedef struct PkgData {
   double width ;
   char emailRecipient[30] ;
   char addressRecipient[100];
-  uint8_t delai ;
+  uint8_t delay ;
 } PkgData ;
 
 

@@ -357,7 +357,7 @@ void setPkgInputs (GtkWidget *widget, Window *w) {
 
         gtk_widget_show_all(w->window) ;
     } else {
-        hello(widget, w) ;
+        writeXLSX(w->pkgData, w->totalPkg) ;
     }
 }
 
@@ -385,10 +385,10 @@ PkgInputs * createPkgInputs (GtkWidget *grid) {
     inputs->emailRecipient = createInput("Recipient's email", grid, 0, 1) ;
     inputs->addressRecipient = createInput("Recipient address", grid, 1, 1) ;
 
-    inputs->delai = gtk_combo_box_text_new() ;
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(inputs->delai), "2d", "2 days") ;
-    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(inputs->delai), "5d", "5 days") ;
-    gtk_grid_attach(GTK_GRID(grid), inputs->delai, 2, 1, 1, 1) ;
+    inputs->delay = gtk_combo_box_text_new() ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(inputs->delay), "2d", "2 days") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(inputs->delay), "5d", "5 days") ;
+    gtk_grid_attach(GTK_GRID(grid), inputs->delay, 2, 1, 1, 1) ;
 
     return inputs ;
 }
@@ -400,7 +400,6 @@ void getDataPkg (GtkWidget *widget, Window *w) {
     getDataPkgDoubles(widget, inputs, &tabPkg) ;
 
     retrieveData(widget, inputs->emailRecipient, &str);
-    printf("%s\n", str) ;
     if (checkEmail(str) != 0) {
         printMessage(widget, "Invalid email") ;
         return ;
@@ -414,14 +413,14 @@ void getDataPkg (GtkWidget *widget, Window *w) {
     }
     strcpy(tabPkg.addressRecipient, str);
 
-    retrieveComboBoxContent(widget, inputs->delai, &str) ;
+    retrieveComboBoxContent(widget, inputs->delay, &str) ;
     if (str == NULL) {
         printMessage(widget, "Empty deadline") ;
         return ;
     }
 
     str[1] = '\0' ;
-    tabPkg.delai = atoi(str) ;
+    tabPkg.delay = atoi(str) ;
     free(w->data) ;
     setPkgInputs(widget, w) ;
 }
