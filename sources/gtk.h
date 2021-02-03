@@ -23,8 +23,10 @@ void getNumberPkg(GtkWidget *widget, Window *w) ;
 void setPkgInputs (GtkWidget *widget, Window *w) ;
 PkgInputs * createPkgInputs (GtkWidget *grid) ;
 
+void getDataPkg(GtkWidget *widget, Window *w);
+void getDataPkgDoubles (GtkWidget *widget, PkgInputs *pkg, PkgData *pkgData) ;
+
 uint8_t checkEmail (char *email) ;
 uint8_t checkDouble (double d) ;
 
-void getDataPkg(GtkWidget *widget, PkgInputs *pkg);
 #endif

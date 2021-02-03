@@ -1,5 +1,7 @@
 #include "all.h"
 
+#define tabPkg w->pkgData[w->currentPkg - 1]
+
 /*
 Function : hello
 --------------------------------------------------------------------------------
@@ -334,21 +336,29 @@ void getNumberPkg(GtkWidget *widget, Window *w) {
     }
     w->totalPkg = (uint8_t)nb ;
     w->currentPkg = 0 ;
+    w->pkgData = malloc(nb * sizeof(PkgData)) ;
+    if (w->pkgData == NULL)
+        return ;
     setPkgInputs(widget, w);
 }
 
 void setPkgInputs (GtkWidget *widget, Window *w) {
     GtkWidget *button ;
+    w->currentPkg++ ;
 
-    gtk_widget_destroy(w->grid) ;
-    w->grid = createGrid(w->window);
+    if (w->currentPkg <= w->totalPkg) {
+        gtk_widget_destroy(w->grid) ;
+        w->grid = createGrid(w->window);
 
-    w->data = createPkgInputs(w->grid);
-    button = gtk_button_new_with_label("Send");
-    gtk_grid_attach(GTK_GRID(w->grid), button, 0,3,1,1);
-    g_signal_connect(GTK_WIDGET(button), "clicked", G_CALLBACK(getDataPkg), w->data);
+        w->data = createPkgInputs(w->grid);
+        button = gtk_button_new_with_label("Send");
+        gtk_grid_attach(GTK_GRID(w->grid), button, 0,3,1,1);
+        g_signal_connect(GTK_WIDGET(button), "clicked", G_CALLBACK(getDataPkg), w);
 
-    gtk_widget_show_all(w->window) ;
+        gtk_widget_show_all(w->window) ;
+    } else {
+        hello(widget, w) ;
+    }
 }
 
 /*
@@ -383,33 +393,37 @@ PkgInputs * createPkgInputs (GtkWidget *grid) {
     return inputs ;
 }
 
-void getDataPkg (GtkWidget *widget, PkgInputs *pkg) {
+void getDataPkg (GtkWidget *widget, Window *w) {
     char *str ;
-    char c[2] ;
-    PkgData *pkgData = malloc(sizeof(PkgData));
+    PkgInputs *inputs = w->data ;
 
-    getDataPkgDoubles(widget, pkg, pkgData) ;
+    getDataPkgDoubles(widget, inputs, &tabPkg) ;
 
-    retrieveData(widget, pkg->emailRecipient, &str);
+    retrieveData(widget, inputs->emailRecipient, &str);
+    printf("%s\n", str) ;
     if (checkEmail(str) != 0) {
         printMessage(widget, "Invalid email") ;
         return ;
     }
-    strcpy(pkgData->emailRecipient, str);
+    strcpy(tabPkg.emailRecipient, str);
 
-    retrieveData(widget, pkg->addressRecipient, &str);
+    retrieveData(widget, inputs->addressRecipient, &str);
     if (strlen(str) == 0) {
-        printMessage("Empty adress") ;
+        printMessage(widget, "Empty adress") ;
         return ;
     }
-    strcpy(pkgData->addressRecipient, str);
+    strcpy(tabPkg.addressRecipient, str);
 
-    retrieveComboBoxContent(widget, pkg->delai, &str) ;
-    strncat(c, str, 1) ;
-    pkgData->delai = atoi(c) ;
+    retrieveComboBoxContent(widget, inputs->delai, &str) ;
+    if (str == NULL) {
+        printMessage(widget, "Empty deadline") ;
+        return ;
+    }
 
-    free(pkg) ;
-    printf("Coucou\n") ;
+    str[1] = '\0' ;
+    tabPkg.delai = atoi(str) ;
+    free(w->data) ;
+    setPkgInputs(widget, w) ;
 }
 
 void getDataPkgDoubles (GtkWidget *widget, PkgInputs *pkg, PkgData *pkgData) {
@@ -445,21 +459,22 @@ void getDataPkgDoubles (GtkWidget *widget, PkgInputs *pkg, PkgData *pkgData) {
 }
 
 uint8_t checkEmail (char *email) {
-    char *ch ;
-    char *tmp ;
+    char *at ;
+    char *point ;
 
-    ch = strchr(email, '@') ;
-    if (ch == NULL)
+    at = strchr(email, '@') ;
+    if (at == NULL || email == at)
         return 1 ;
-    ch++;
-    tmp = ch ;
+    at++;
+    point = at ;
 
-    ch = strchr(ch, '@') ;
-    if (ch != NULL)
+    at = strchr(at, '@') ;
+    if (at != NULL)
         return 1 ;
 
-    tmp = strchr(tmp, '.') ;
-    if (tmp == NULL)
+    at = strchr(email, '@') ;
+    point = strchr(point, '.') ;
+    if (point == NULL || email + strlen(email) - 1 == point || at + 1 == point)
         return 1 ;
 
     return 0 ;
