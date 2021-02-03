@@ -1,15 +1,16 @@
 #Compilation flags
-CFLAGS = -Wall -o
+CFLAGS = -Wall `pkg-config --cflags gtk+-3.0` -o
 
 #Libraries
 LIB_CURL = -l curl
-LIB_EXCEL = -l xlsxwriter
+LIB_EXWR = -l xlsxwriter
+LIBS = `pkg-config --libs gtk+-3.0`
 
 #C files
 CFILES_UP = upload.c
 CFILES_DOWN = download.c
 CFILES_QR = qr.c libraries/qrcodegen/qrcodegen.c
-CFILES_EXWR = excel.c
+CFILES_EXWR = main.c excel.c gtk.c
 
 #Executable name
 EXE_UP = up
@@ -27,4 +28,4 @@ qrcode:
 	gcc $(CFLAGS) $(EXE_QR) $(CFILES_QR)
 
 excelwrite:
-	gcc $(CFLAGS) $(EXE_EXWR) $(CFILES_EXWR) $(LIB_EXCEL)
+	gcc $(CFLAGS) $(EXE_EXWR) $(CFILES_EXWR) $(LIBS) $(LIB_EXWR)
