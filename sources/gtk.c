@@ -274,6 +274,7 @@ uint8_t retrieveDouble (GtkWidget *widget, GtkWidget *input, double *nb) {
     //trimWhiteSpace(tmp) ;
 
     *nb = atof(tmp) ;
+    printf("%lf\n", *nb) ;
 
     return 0 ;
 }
@@ -350,6 +351,8 @@ void setPkgInputs (GtkWidget *widget, Window *w) {
         gtk_widget_destroy(w->grid) ;
         w->grid = createGrid(w->window);
 
+        addLabel(w->grid, 0, 0, "Enter float as 0,3") ;
+
         w->data = createPkgInputs(w->grid);
         button = gtk_button_new_with_label("Send");
         gtk_grid_attach(GTK_GRID(w->grid), button, 0,3,1,1);
@@ -378,17 +381,17 @@ PkgInputs * createPkgInputs (GtkWidget *grid) {
     if (inputs == NULL)
         return NULL ;
 
-    inputs->weight = createInput("Weight", grid, 0, 0) ;
-    inputs->length = createInput("Length", grid, 1, 0) ;
-    inputs->height = createInput("Height", grid, 2, 0) ;
-    inputs->width = createInput("Width", grid, 3, 0) ;
-    inputs->emailRecipient = createInput("Recipient's email", grid, 0, 1) ;
-    inputs->addressRecipient = createInput("Recipient address", grid, 1, 1) ;
+    inputs->weight = createInput("Weight", grid, 0, 1) ;
+    inputs->length = createInput("Length", grid, 1, 1) ;
+    inputs->height = createInput("Height", grid, 2, 1) ;
+    inputs->width = createInput("Width", grid, 3, 1) ;
+    inputs->emailRecipient = createInput("Recipient's email", grid, 0, 2) ;
+    inputs->addressRecipient = createInput("Recipient address", grid, 1, 2) ;
 
     inputs->delay = gtk_combo_box_text_new() ;
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(inputs->delay), "2d", "2 days") ;
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(inputs->delay), "5d", "5 days") ;
-    gtk_grid_attach(GTK_GRID(grid), inputs->delay, 2, 1, 1, 1) ;
+    gtk_grid_attach(GTK_GRID(grid), inputs->delay, 2, 2, 1, 1) ;
 
     return inputs ;
 }

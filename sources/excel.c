@@ -40,10 +40,13 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
 
     lxw_workbook  *workbook  = workbook_new(fileName);
     lxw_worksheet *worksheet = workbook_add_worksheet(workbook, NULL);
+    lxw_format    *format   = workbook_add_format(workbook);
+
+    format_set_num_format(format, "0.000");
     writeLabels(worksheet) ;
 
     for (row = 1 ; row <= totalPkg ; row++) {
-        worksheet_write_number(worksheet, row, 0, pkgData[row-1].weight, NULL);
+        worksheet_write_number(worksheet, row, 0, (float)pkgData[row-1].weight, format);
         worksheet_write_number(worksheet, row, 1, pkgData[row-1].length, NULL);
         worksheet_write_number(worksheet, row, 2, pkgData[row-1].height, NULL);
         worksheet_write_number(worksheet, row, 3, pkgData[row-1].width, NULL);
