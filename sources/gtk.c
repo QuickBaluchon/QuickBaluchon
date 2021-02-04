@@ -1,7 +1,5 @@
 #include "all.h"
 
-#define tabPkg w->pkgData[w->currentPkg - 1]
-
 Modify *modify; //ON ASSUME, C BON Y'A QUOI ? mangetesmorts(){ }
 /*
 Function : hello
@@ -326,6 +324,7 @@ void getNumberPkg(GtkWidget *widget, Window *w) {
     }
     w->totalPkg = (uint8_t)nb ;
     w->currentPkg = 0 ;
+    w->modifPkg = w->totalPkg ;
     w->pkgData = malloc(nb * sizeof(PkgData)) ;
     if (w->pkgData == NULL)
         return ;
@@ -377,13 +376,18 @@ void printPkgs(GtkWidget *widget, Window *w) {
 }
 
 void printPkgData (Window *w) {
-    modify = malloc(sizeof(Modify) * w->totalPkg);
-
     GtkWidget *button;
     char str[15] = "" ;
     uint8_t i ;
+
+    modify = malloc(sizeof(Modify) * w->totalPkg);
+    if (modify == NULL)
+        return ;
+
+
     for (i = 0 ; i < w->totalPkg; i++){
-        modify->select = i;
+        modify[i].select = i;
+        modify[i].w = w ;
         sprintf(str, "Package %d", i+1) ;
         addLabel(w->grid, i+1, 0, str) ;
 
@@ -407,8 +411,61 @@ void printPkgData (Window *w) {
         addLabel(w->grid, i+1, 7, str) ;
 
         button = gtk_button_new_with_label("modify");
-        g_signal_connect(button, "clicked", G_CALLBACK(), i);
+        gtk_grid_attach(GTK_GRID(w->grid), button, 8, i+1, 1, 1) ;
+        g_signal_connect(button, "clicked", G_CALLBACK(modifyPkgData), &modify[i].select);
     }
+}
+
+void modifyPkgData (uint8_t *i) {
+    Window *w ;
+    GtkWidget *button ;
+    char title[15] ;
+    if (modify == NULL)
+        return ;
+    w = modify[*i].w ;
+    w->modifPkg = *i ;
+    free(modify) ;
+
+    sprintf(title, "Package %d/%d", *i+1, w->totalPkg);
+    gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+
+    gtk_widget_destroy(w->grid) ;
+    w->grid = createGrid(w->window);
+
+    w->data = createPkgInputs(w->grid) ;
+    getPkgValues(w, *i) ;
+
+    button = gtk_button_new_with_label("Send");
+    gtk_grid_attach(GTK_GRID(w->grid), button, 0,3,1,1);
+    g_signal_connect(GTK_WIDGET(button), "clicked", G_CALLBACK(getDataPkg), w);
+
+    gtk_widget_show_all(w->window) ;
+}
+
+void getPkgValues(Window *w, uint8_t i) {
+    PkgInputs *inputs = w->data ;
+    char str[10] = "" ;
+
+    sprintf(str, "%lf",  w->pkgData[i].weight) ;
+    gtk_entry_set_text(GTK_ENTRY(inputs->weight), str) ;
+
+    sprintf(str, "%lf",  w->pkgData[i].length) ;
+    gtk_entry_set_text(GTK_ENTRY(inputs->length), str) ;
+
+    sprintf(str, "%lf",  w->pkgData[i].height) ;
+    gtk_entry_set_text(GTK_ENTRY(inputs->height), str) ;
+
+    sprintf(str, "%lf",  w->pkgData[i].width) ;
+    gtk_entry_set_text(GTK_ENTRY(inputs->width), str) ;
+
+    gtk_entry_set_text(GTK_ENTRY(inputs->emailRecipient), w->pkgData[i].emailRecipient) ;
+
+    gtk_entry_set_text(GTK_ENTRY(inputs->addressRecipient), w->pkgData[i].addressRecipient) ;
+
+    if (w->pkgData[i].delay == 2)
+        gtk_combo_box_set_active_id(GTK_COMBO_BOX(inputs->delay), "2d") ;
+    else
+        gtk_combo_box_set_active_id(GTK_COMBO_BOX(inputs->delay), "2d") ;
 }
 
 /*
@@ -446,22 +503,28 @@ PkgInputs * createPkgInputs (GtkWidget *grid) {
 void getDataPkg (GtkWidget *widget, Window *w) {
     char *str ;
     PkgInputs *inputs = w->data ;
+    PkgData *pkgData ;
 
-    getDataPkgDoubles(widget, inputs, &tabPkg) ;
+    if (w->modifPkg == w->totalPkg)
+        pkgData = &(w->pkgData[w->currentPkg - 1]) ;
+    else
+        pkgData = &(w->pkgData[w->modifPkg]) ;
+
+    getDataPkgDoubles(widget, inputs, pkgData) ;
 
     retrieveData(widget, inputs->emailRecipient, &str);
     if (checkEmail(str) != 0) {
         printMessage(widget, "Invalid email") ;
         return ;
     }
-    strcpy(tabPkg.emailRecipient, str);
+    strcpy(pkgData->emailRecipient, str);
 
     retrieveData(widget, inputs->addressRecipient, &str);
     if (strlen(str) == 0) {
         printMessage(widget, "Empty adress") ;
         return ;
     }
-    strcpy(tabPkg.addressRecipient, str);
+    strcpy(pkgData->addressRecipient, str);
 
     retrieveComboBoxContent(widget, inputs->delay, &str) ;
     if (str == NULL) {
@@ -470,7 +533,7 @@ void getDataPkg (GtkWidget *widget, Window *w) {
     }
 
     str[1] = '\0' ;
-    tabPkg.delay = atoi(str) ;
+    pkgData->delay = atoi(str) ;
     free(w->data) ;
     setPkgInputs(widget, w) ;
 }

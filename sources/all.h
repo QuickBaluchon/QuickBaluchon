@@ -42,6 +42,7 @@ typedef struct Window {
     void *data ;
     uint8_t currentPkg;
     uint8_t totalPkg ;
+    uint8_t modifPkg ;
     PkgData *pkgData ;
 } Window ;
 

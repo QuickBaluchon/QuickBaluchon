@@ -23,6 +23,8 @@ void setPkgInputs (GtkWidget *widget, Window *w) ;
 PkgInputs * createPkgInputs (GtkWidget *grid) ;
 
 void printPkgData (Window *w) ;
+void modifyPkgData (uint8_t *i) ;
+void getPkgValues(Window *w, uint8_t i) ;
 
 void getDataPkg(GtkWidget *widget, Window *w);
 void getDataPkgDoubles (GtkWidget *widget, PkgInputs *pkg, PkgData *pkgData) ;
