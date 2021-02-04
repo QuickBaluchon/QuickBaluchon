@@ -45,6 +45,11 @@ typedef struct Window {
     PkgData *pkgData ;
 } Window ;
 
+typedef struct Modify {
+    Window *w ;
+    uint8_t select ;
+} Modify ;
+
 #include "api.h"
 #include "excel.h"
 #include "gtk.h"

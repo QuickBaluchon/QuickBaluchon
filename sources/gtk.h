@@ -10,7 +10,6 @@ GtkWidget * createInput (char *placeholder, GtkWidget *grid, uint8_t lin, uint8_
 void addLabel (GtkWidget *grid, uint8_t lin, uint8_t col, char *str) ;
 void backgroundColor (GtkWidget *widget, char *color) ;
 void destroy (GtkWidget *widget, gpointer data) ;
-void closeWindow (GtkWidget *widget, GtkWidget *window) ;
 
 void retrieveData(GtkWidget *widget, GtkWidget *input, char **str) ;
 void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) ;
@@ -23,10 +22,13 @@ void getNumberPkg(GtkWidget *widget, Window *w) ;
 void setPkgInputs (GtkWidget *widget, Window *w) ;
 PkgInputs * createPkgInputs (GtkWidget *grid) ;
 
+void printPkgData (Window *w) ;
+
 void getDataPkg(GtkWidget *widget, Window *w);
 void getDataPkgDoubles (GtkWidget *widget, PkgInputs *pkg, PkgData *pkgData) ;
 
 uint8_t checkEmail (char *email) ;
 uint8_t checkDouble (double d) ;
 
+void printPkgs(GtkWidget *widget, Window *w) ;
 #endif

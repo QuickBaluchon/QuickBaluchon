@@ -2,6 +2,7 @@
 
 #define tabPkg w->pkgData[w->currentPkg - 1]
 
+Modify *modify; //ON ASSUME, C BON Y'A QUOI ? mangetesmorts(){ }
 /*
 Function : hello
 --------------------------------------------------------------------------------
@@ -153,22 +154,8 @@ gpointer data : void pointer
 
 */
 void destroy (GtkWidget *widget, gpointer data) {
+
     gtk_main_quit();
-}
-
-/*
-Function : closeWindow
---------------------------------------------------------------------------------
-Closes a window
-
---------------------------------------------------------------------------------
-GtkWidget *widget : widget sent by callback functions
-GtkWidget *window : window to be destroyed
---------------------------------------------------------------------------------
-
-*/
-void closeWindow (GtkWidget *widget, GtkWidget *window) {
-    gtk_window_close(GTK_WINDOW(window)) ;
 }
 
 
@@ -274,7 +261,7 @@ uint8_t retrieveDouble (GtkWidget *widget, GtkWidget *input, double *nb) {
     //trimWhiteSpace(tmp) ;
 
     *nb = atof(tmp) ;
-    printf("%lf\n", *nb) ;
+
 
     return 0 ;
 }
@@ -366,11 +353,61 @@ void setPkgInputs (GtkWidget *widget, Window *w) {
 
         gtk_widget_show_all(w->window) ;
     } else {
-        strcpy(title, "Packages check") ;
-        gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+        printPkgs(widget, w);
+    }
+}
 
-        gtk_widget_destroy(w->grid) ;
-        writeXLSX(w->pkgData, w->totalPkg) ;
+void printPkgs(GtkWidget *widget, Window *w) {
+    char title[15] ;
+    char cols[7][30] = {"Weight", "Length", "Height", "Width", "Recipient's mail", "Recipient's address", "Delay"};
+    uint8_t i ;
+
+    strcpy(title, "Packages check") ;
+    gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+
+    gtk_widget_destroy(w->grid) ;
+    w->grid = createGrid(w->window) ;
+
+    for (i = 0 ; i < 7 ; ++i)
+        addLabel(w->grid, 0, i+1, cols[i]) ;
+
+    printPkgData(w);
+    //writeXLSX(w->pkgData, w->totalPkg) ;
+    gtk_widget_show_all(w->window) ;
+}
+
+void printPkgData (Window *w) {
+    modify = malloc(sizeof(Modify) * w->totalPkg);
+
+    GtkWidget *button;
+    char str[15] = "" ;
+    uint8_t i ;
+    for (i = 0 ; i < w->totalPkg; i++){
+        modify->select = i;
+        sprintf(str, "Package %d", i+1) ;
+        addLabel(w->grid, i+1, 0, str) ;
+
+        sprintf(str, "%lf", w->pkgData[i].weight) ;
+        addLabel(w->grid, i+1, 1, str) ;
+
+        sprintf(str, "%lf", w->pkgData[i].length) ;
+        addLabel(w->grid, i+1, 2, str) ;
+
+        sprintf(str, "%lf", w->pkgData[i].width) ;
+        addLabel(w->grid, i+1, 3, str) ;
+
+        sprintf(str, "%lf", w->pkgData[i].height) ;
+        addLabel(w->grid, i+1, 4, str) ;
+
+        addLabel(w->grid, i+1, 5, w->pkgData[i].emailRecipient) ;
+
+        addLabel(w->grid, i+1, 6, w->pkgData[i].addressRecipient) ;
+
+        sprintf(str, "%d", w->pkgData[i].delay) ;
+        addLabel(w->grid, i+1, 7, str) ;
+
+        button = gtk_button_new_with_label("modify");
+        g_signal_connect(button, "clicked", G_CALLBACK(), i);
     }
 }
 
