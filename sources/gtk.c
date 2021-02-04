@@ -314,6 +314,8 @@ void askNumberPkg (void) {
     gtk_grid_attach(GTK_GRID(w->grid), button, 1,1,1,1);
     g_signal_connect(GTK_WIDGET(button), "clicked", G_CALLBACK(getNumberPkg), w);
 
+    g_signal_connect(GTK_WIDGET(w->window), "destroy", G_CALLBACK(destroy), w);
+
     gtk_widget_show_all(w->window) ;
 }
 
@@ -345,13 +347,17 @@ void getNumberPkg(GtkWidget *widget, Window *w) {
 
 void setPkgInputs (GtkWidget *widget, Window *w) {
     GtkWidget *button ;
+    char title[15] = "" ;
     w->currentPkg++ ;
 
     if (w->currentPkg <= w->totalPkg) {
+        sprintf(title, "Package %d/%d", w->currentPkg, w->totalPkg);
+        gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+
         gtk_widget_destroy(w->grid) ;
         w->grid = createGrid(w->window);
 
-        addLabel(w->grid, 0, 0, "Enter float as 0,3") ;
+        addLabel(w->grid, 0, 0, "Enter float as 0.3") ;
 
         w->data = createPkgInputs(w->grid);
         button = gtk_button_new_with_label("Send");
@@ -360,6 +366,10 @@ void setPkgInputs (GtkWidget *widget, Window *w) {
 
         gtk_widget_show_all(w->window) ;
     } else {
+        strcpy(title, "Packages check") ;
+        gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+
+        gtk_widget_destroy(w->grid) ;
         writeXLSX(w->pkgData, w->totalPkg) ;
     }
 }

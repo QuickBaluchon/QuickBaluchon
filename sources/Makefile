@@ -16,7 +16,7 @@ CFILES_EXWR = main.c excel.c gtk.c
 EXE_UP = up
 EXE_DOWN = down
 EXE_QR = qr
-EXE_EXWR = excel
+EXE_EXWR = main
 
 upload:
 	gcc $(CFLAGS) $(EXE_UP) $(CFILES_UP) $(LIB_CURL)
@@ -27,5 +27,5 @@ download:
 qrcode:
 	gcc $(CFLAGS) $(EXE_QR) $(CFILES_QR)
 
-excelwrite:
+program:
 	gcc $(CFLAGS) $(EXE_EXWR) $(CFILES_EXWR) $(LIBS) $(LIB_EXWR)
