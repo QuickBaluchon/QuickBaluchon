@@ -376,14 +376,16 @@ void printPkgs(GtkWidget *widget, Window *w) {
 }
 
 void printPkgData (Window *w) {
-    GtkWidget *button;
+    GtkWidget **button = malloc(sizeof(GtkWidget *) * w->totalPkg);
     char str[15] = "" ;
     uint8_t i ;
 
     modify = malloc(sizeof(Modify) * w->totalPkg);
     if (modify == NULL)
         return ;
-
+    if (button == NULL)
+        return ;
+    w->data = button ;
 
     for (i = 0 ; i < w->totalPkg; i++){
         modify[i].select = i;
@@ -410,30 +412,33 @@ void printPkgData (Window *w) {
         sprintf(str, "%d", w->pkgData[i].delay) ;
         addLabel(w->grid, i+1, 7, str) ;
 
-        button = gtk_button_new_with_label("modify");
-        gtk_grid_attach(GTK_GRID(w->grid), button, 8, i+1, 1, 1) ;
-        g_signal_connect(button, "clicked", G_CALLBACK(modifyPkgData), &modify[i].select);
+        button[i] = gtk_button_new_with_label("modify");
+        gtk_grid_attach(GTK_GRID(w->grid), button[i], 8, i+1, 1, 1) ;
+        g_signal_connect(button[i], "clicked", G_CALLBACK(modifyPkgData), &(modify[i].select));
     }
 }
 
-void modifyPkgData (uint8_t *i) {
+void modifyPkgData (GtkWidget *widget, uint8_t *i) {
     Window *w ;
     GtkWidget *button ;
     char title[15] ;
     if (modify == NULL)
         return ;
     w = modify[*i].w ;
+
     w->modifPkg = *i ;
     free(modify) ;
+    if (w->data != NULL)
+        free(w->data) ;
 
-    sprintf(title, "Package %d/%d", *i+1, w->totalPkg);
+    sprintf(title, "Package %d/%d", w->modifPkg+1, w->totalPkg);
     gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
 
     gtk_widget_destroy(w->grid) ;
     w->grid = createGrid(w->window);
 
     w->data = createPkgInputs(w->grid) ;
-    getPkgValues(w, *i) ;
+    getPkgValues(w, w->modifPkg) ;
 
     button = gtk_button_new_with_label("Send");
     gtk_grid_attach(GTK_GRID(w->grid), button, 0,3,1,1);
@@ -445,6 +450,7 @@ void modifyPkgData (uint8_t *i) {
 void getPkgValues(Window *w, uint8_t i) {
     PkgInputs *inputs = w->data ;
     char str[10] = "" ;
+    char strl[100] = "" ;
 
     sprintf(str, "%lf",  w->pkgData[i].weight) ;
     gtk_entry_set_text(GTK_ENTRY(inputs->weight), str) ;
@@ -458,14 +464,16 @@ void getPkgValues(Window *w, uint8_t i) {
     sprintf(str, "%lf",  w->pkgData[i].width) ;
     gtk_entry_set_text(GTK_ENTRY(inputs->width), str) ;
 
-    gtk_entry_set_text(GTK_ENTRY(inputs->emailRecipient), w->pkgData[i].emailRecipient) ;
+    strcpy(strl, w->pkgData[i].emailRecipient) ;
+    gtk_entry_set_text(GTK_ENTRY(inputs->emailRecipient), strl) ;
 
-    gtk_entry_set_text(GTK_ENTRY(inputs->addressRecipient), w->pkgData[i].addressRecipient) ;
+    strcpy(strl, w->pkgData[i].addressRecipient) ;
+    gtk_entry_set_text(GTK_ENTRY(inputs->addressRecipient), strl) ;
 
     if (w->pkgData[i].delay == 2)
         gtk_combo_box_set_active_id(GTK_COMBO_BOX(inputs->delay), "2d") ;
     else
-        gtk_combo_box_set_active_id(GTK_COMBO_BOX(inputs->delay), "2d") ;
+        gtk_combo_box_set_active_id(GTK_COMBO_BOX(inputs->delay), "5d") ;
 }
 
 /*
