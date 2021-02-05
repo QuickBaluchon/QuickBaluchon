@@ -9,9 +9,6 @@ void writeXLSX (GtkWidget *widget, Window *w) {
     if (w->data != NULL)
         free(w->data) ;
 
-    printf("%p\n", w) ;
-    printf("%lf\n", w->pkgData[0].width) ;
-
     if (createXLSXfile(file) != 0) {
         printMessage(NULL, "Error in creating the XLSX file") ;
         return ;
@@ -21,6 +18,10 @@ void writeXLSX (GtkWidget *widget, Window *w) {
         printMessage(NULL, "Error in writing the XLSX file") ;
         return ;
     }
+
+    uploadExcel(file, w->totalPkg) ;
+    free(w->pkgData) ;
+    askNumberPkg(w) ;
 }
 
 uint8_t createXLSXfile (char *fileName) {
@@ -28,7 +29,7 @@ uint8_t createXLSXfile (char *fileName) {
     char time[22] = "" ;
 
     getDateTime(time) ;
-    sprintf(fileName, "%d-%s.xlsx", idUser, time) ;
+    sprintf(fileName, "%d-%s.xls", idUser, time) ;
 
     xlsx = fopen(fileName, "w+") ;
     if (xlsx == NULL)
@@ -39,6 +40,41 @@ uint8_t createXLSXfile (char *fileName) {
 }
 
 
+uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
+    BookHandle book = xlCreateBook();
+    uint8_t f, row;
+    FormatHandle format;
+    SheetHandle sheet;
+
+    if (book) {
+        //setup numeric format
+        f = xlBookAddCustomNumFormat(book, "0.00");
+        format = xlBookAddFormat(book, 0);
+        xlFormatSetNumFormat(format, f);
+
+        sheet = xlBookAddSheet(book, "Custom formats", 0);
+        if (sheet) {
+            writeLabels(sheet) ;
+            for (row = 1 ; row <= totalPkg ; row++) {
+                xlSheetWriteNum(sheet, row, 0, pkgData[row-1].weight, 0);
+                xlSheetWriteNum(sheet, row, 1, pkgData[row-1].length, 0);
+                xlSheetWriteNum(sheet, row, 2, pkgData[row-1].height, 0);
+                xlSheetWriteNum(sheet, row, 3, pkgData[row-1].width, 0);
+                xlSheetWriteStr(sheet, row, 4, pkgData[row-1].emailRecipient, 0);
+                xlSheetWriteStr(sheet, row, 5, pkgData[row-1].addressRecipient, 0);
+                xlSheetWriteNum(sheet, row, 6, pkgData[row-1].delay, 0);
+            }
+        }
+    }
+
+    free(pkgData) ;
+    if(xlBookSave(book, fileName))
+        printf("File custom.xls has been created.\n");
+    xlBookRelease(book);
+    return 0 ;
+}
+
+/*
 uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
     uint16_t row ;
 
@@ -63,11 +99,12 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
     workbook_close(workbook);
     return 0 ;
 }
+*/
 
-void writeLabels (lxw_worksheet *worksheet) {
+void writeLabels (SheetHandle worksheet) {
     char cols[7][30] = {"weight", "length", "height", "width", "Recipient's mail", "Recipient's address", "Delay"};
     for (int i = 0 ; i < 7 ; ++i)
-        worksheet_write_string(worksheet, 0, i, cols[i], NULL) ;
+        xlSheetWriteStr(worksheet, 0, i, cols[i], 0) ;
 }
 
 

@@ -29,4 +29,3 @@ libxl.dylib:
 
 clean:
 	rm -f generate extract edit custom format invoice performance *.xls *.xlsx
-

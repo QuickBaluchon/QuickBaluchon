@@ -8,6 +8,7 @@
 #include <gtk/gtk.h>
 #include <time.h>
 #include <curl/curl.h>
+#include "libxl.h"
 
 typedef struct PkgInputs {
   GtkWidget *weight;

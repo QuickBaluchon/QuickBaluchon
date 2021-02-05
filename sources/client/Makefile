@@ -4,8 +4,9 @@ CFLAGS = -Wall `pkg-config --cflags gtk+-3.0` -o
 #Libraries
 LIB_CURL = -l curl
 LIB_EXWR = -l xlsxwriter
+LIB_XL = -I../libraries/libxl/include_c -L../libraries/libxl/lib -lxl
 LIBS = `pkg-config --libs gtk+-3.0`
-ALL_LIBS = $(LIBS) $(LIB_CURL) $(LIB_EXWR)
+ALL_LIBS = $(LIBS) $(LIB_CURL) $(LIB_XL) $(LIB_EXWR)
 
 #C files
 CFILES_UP = upload.c
@@ -30,5 +31,8 @@ download:
 qrcode:
 	gcc $(CFLAGS) $(EXE_QR) $(CFILES_QR)
 
-program:
+program: libxl.dylib
 	gcc $(CFLAGS) $(EXE) $(ALL_FILES) $(ALL_LIBS)
+
+libxl.dylib:
+	cp ../libraries/libxl/lib/libxl.dylib ./

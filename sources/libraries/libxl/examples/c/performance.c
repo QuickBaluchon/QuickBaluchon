@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "libxl.h"
+#include "../include_c/libxl.h"
 
 const int maxRow = 20000;
 const int maxCol = 256;
@@ -10,9 +10,9 @@ char* makeString()
 {
     static char s[9] = {0};
     int i;
-    
+
     for(i = 0; i < 8; ++i) {
-        s[i] = 0x61 + rand() % 26;        
+        s[i] = 0x61 + rand() % 26;
     }
 
     return s;
@@ -24,7 +24,7 @@ void test(int number)
     SheetHandle sheet;
     clock_t t1, t2, t3;
     int row, col;
-    double d, n;	
+    double d, n;
 
     printf("---------------------------------\n");
     if(number == 1) {
@@ -77,7 +77,7 @@ void test(int number)
             d = (double)(t3 - t1) / CLOCKS_PER_SEC;
             if(d > 0) {
                 n = (maxRow - 1) * maxCol / d;
-                printf("speed with saving on disk: %d cells/sec\n", (int)n);			
+                printf("speed with saving on disk: %d cells/sec\n", (int)n);
             }
             printf("\n");
         }
