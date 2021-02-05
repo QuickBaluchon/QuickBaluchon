@@ -1,13 +1,7 @@
-#Compilation flags
-CFLAGS = -Wall -o
+CFLAGS = -I../libraries/libxl/include_c -L../libraries/libxl/lib -lxl
 
-#Libraries
+program: libxl.dylib
+	gcc main.c -o main $(CFLAGS)
 
-#C files
-ALL_FILES = main.c ../libraries/libxls/src/xls.c ../libraries/libxls/src/xlstool.c ../libraries/libxls/src/endian.c ../libraries/libxls/src/locale.c ../libraries/libxls/src/ole.c ../libraries/libxls/src/xls2csv.c
-
-#Executable name
-EXE = main
-
-program:
-	gcc $(CFLAGS) $(EXE) $(ALL_FILES)
+libxl.dylib:
+	cp ../libraries/libxl/lib/libxl.dylib ./
