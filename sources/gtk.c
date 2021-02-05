@@ -1,5 +1,7 @@
 #include "all.h"
 
+extern int idUser ;
+
 Modify *modify; //ON ASSUME, C BON Y'A QUOI ? mangetesmorts(){ }
 /*
 Function : hello
@@ -267,9 +269,51 @@ uint8_t retrieveDouble (GtkWidget *widget, GtkWidget *input, double *nb) {
 
 void initProg (int argc, char **argv) {
     gtk_init(&argc, &argv);
-    //askCredentials() ;
-    askNumberPkg() ;
+    askCredentials() ;
+    //askNumberPkg() ;
     gtk_main() ;
+}
+
+
+void askCredentials (void) {
+    Window *w = malloc(sizeof(Window)) ;
+    GtkWidget *button;
+    GtkWidget **inputs = malloc(sizeof(GtkWidget *) * 2) ;
+
+    if (w == NULL)
+        return ;
+
+    strcpy(w->winName, "Number of packages");
+    w->window = createWindow(w->winName, 640, 360) ;
+    w->grid = createGrid(w->window) ;
+
+    inputs[0] = createInput("User name", w->grid, 0, 0);
+    inputs[1] = createInput("Password", w->grid, 0, 1);
+    w->data = inputs ;
+
+    button = gtk_button_new_with_label("Sign up");
+    gtk_grid_attach(GTK_GRID(w->grid), button, 1,1,1,1);
+    g_signal_connect(GTK_WIDGET(button), "clicked", G_CALLBACK(getCredentials), w);
+
+    g_signal_connect(GTK_WIDGET(w->window), "destroy", G_CALLBACK(destroy), w);
+
+    gtk_widget_show_all(w->window) ;
+}
+
+void getCredentials (GtkWidget *widget, Window *w) {
+    char *username ;
+    char *pwd ;
+    GtkWidget **data = w->data ;
+    retrieveData(widget, data[0], &username);
+    retrieveData(widget, data[1], &pwd);
+
+    connectAPI(username, pwd) ;
+    if (idUser == 0) {
+        printMessage(widget, "Wrong credentials");
+        return ;
+    }
+    free(w->data);
+    askNumberPkg(w) ;
 }
 
 
@@ -279,17 +323,15 @@ Function : askNumberPkg
 Open a window that asks how many packages will be sent
 Calls gtk.c/(getNumberPkg) when the button is clicked
 */
-void askNumberPkg (void) {
-    Window *w = malloc(sizeof(Window)) ;
+void askNumberPkg (Window *w) {
     GtkWidget *button;
     GtkWidget *input ;
 
-    if (w == NULL)
-        return ;
-
     strcpy(w->winName, "Number of packages");
-    w->window = createWindow(w->winName, 640, 360) ;
-    w->grid = createGrid(w->window) ;
+    gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)w->winName) ;
+
+    gtk_widget_destroy(w->grid) ;
+    w->grid = createGrid(w->window);
 
     addLabel(w->grid, 0, 0, "Enter the number of packages");
     input = createInput("Number of packages", w->grid, 0, 1);
@@ -298,8 +340,6 @@ void askNumberPkg (void) {
     button = gtk_button_new_with_label("OK !!!");
     gtk_grid_attach(GTK_GRID(w->grid), button, 1,1,1,1);
     g_signal_connect(GTK_WIDGET(button), "clicked", G_CALLBACK(getNumberPkg), w);
-
-    g_signal_connect(GTK_WIDGET(w->window), "destroy", G_CALLBACK(destroy), w);
 
     gtk_widget_show_all(w->window) ;
 }
@@ -333,12 +373,11 @@ void getNumberPkg(GtkWidget *widget, Window *w) {
 
 void setPkgInputs (GtkWidget *widget, Window *w) {
     GtkWidget *button ;
-    char title[15] = "" ;
     w->currentPkg++ ;
 
     if (w->currentPkg <= w->totalPkg) {
-        sprintf(title, "Package %d/%d", w->currentPkg, w->totalPkg);
-        gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+        sprintf(w->winName, "Package %d/%d", w->currentPkg, w->totalPkg);
+        gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)w->winName) ;
 
         gtk_widget_destroy(w->grid) ;
         w->grid = createGrid(w->window);
@@ -357,12 +396,12 @@ void setPkgInputs (GtkWidget *widget, Window *w) {
 }
 
 void printPkgs(GtkWidget *widget, Window *w) {
-    char title[15] ;
     char cols[7][30] = {"Weight", "Length", "Height", "Width", "Recipient's mail", "Recipient's address", "Delay"};
     uint8_t i ;
+    GtkWidget *button ;
 
-    strcpy(title, "Packages check") ;
-    gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+    strcpy(w->winName, "Packages check") ;
+    gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)w->winName) ;
 
     gtk_widget_destroy(w->grid) ;
     w->grid = createGrid(w->window) ;
@@ -371,7 +410,11 @@ void printPkgs(GtkWidget *widget, Window *w) {
         addLabel(w->grid, 0, i+1, cols[i]) ;
 
     printPkgData(w);
-    //writeXLSX(w->pkgData, w->totalPkg) ;
+
+    button = gtk_button_new_with_label("Send");
+    g_signal_connect(button, "clicked", G_CALLBACK(writeXLSX), w);
+    gtk_grid_attach(GTK_GRID(w->grid), button, 8, w->totalPkg + 2, 1, 1) ;
+
     gtk_widget_show_all(w->window) ;
 }
 
@@ -385,6 +428,7 @@ void printPkgData (Window *w) {
         return ;
     if (button == NULL)
         return ;
+
     w->data = button ;
 
     for (i = 0 ; i < w->totalPkg; i++){
@@ -399,10 +443,10 @@ void printPkgData (Window *w) {
         sprintf(str, "%lf", w->pkgData[i].length) ;
         addLabel(w->grid, i+1, 2, str) ;
 
-        sprintf(str, "%lf", w->pkgData[i].width) ;
+        sprintf(str, "%lf", w->pkgData[i].height) ;
         addLabel(w->grid, i+1, 3, str) ;
 
-        sprintf(str, "%lf", w->pkgData[i].height) ;
+        sprintf(str, "%lf", w->pkgData[i].width) ;
         addLabel(w->grid, i+1, 4, str) ;
 
         addLabel(w->grid, i+1, 5, w->pkgData[i].emailRecipient) ;
@@ -421,7 +465,6 @@ void printPkgData (Window *w) {
 void modifyPkgData (GtkWidget *widget, uint8_t *i) {
     Window *w ;
     GtkWidget *button ;
-    char title[15] ;
     if (modify == NULL)
         return ;
     w = modify[*i].w ;
@@ -431,8 +474,8 @@ void modifyPkgData (GtkWidget *widget, uint8_t *i) {
     if (w->data != NULL)
         free(w->data) ;
 
-    sprintf(title, "Package %d/%d", w->modifPkg+1, w->totalPkg);
-    gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)title) ;
+    sprintf(w->winName, "Package %d/%d", w->modifPkg+1, w->totalPkg);
+    gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)w->winName) ;
 
     gtk_widget_destroy(w->grid) ;
     w->grid = createGrid(w->window);

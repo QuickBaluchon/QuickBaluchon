@@ -1,25 +1,29 @@
 #include "all.h"
 
+extern int idUser ;
 
-void writeXLSX (PkgData *pkg, uint8_t totalPkg) {
+void writeXLSX (GtkWidget *widget, Window *w) {
     char file[30] = "" ;
-    UserData uData ;
-    uData.id = 0 ;
-    strcpy(uData.name, "yolo") ;
-    strcpy(uData.password, "yolo") ;
 
-    if (createXLSXfile(0, file) != 0) {
+    //free the buttons
+    if (w->data != NULL)
+        free(w->data) ;
+
+    printf("%p\n", w) ;
+    printf("%lf\n", w->pkgData[0].width) ;
+
+    if (createXLSXfile(file) != 0) {
         printMessage(NULL, "Error in creating the XLSX file") ;
         return ;
     }
 
-    if (writeData(file, pkg, totalPkg)) {
+    if (writeData(file, w->pkgData, w->totalPkg)) {
         printMessage(NULL, "Error in writing the XLSX file") ;
         return ;
     }
 }
 
-uint8_t createXLSXfile (uint8_t idUser, char *fileName) {
+uint8_t createXLSXfile (char *fileName) {
     FILE *xlsx ;
     char time[22] = "" ;
 

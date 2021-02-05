@@ -16,8 +16,10 @@ void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) ;
 uint8_t retrieveInteger (GtkWidget *widget, GtkWidget *input, int16_t *integer) ;
 
 void initProg (int argc, char **argv) ;
+void askCredentials (void) ;
+void getCredentials (GtkWidget *widget, Window *w) ;
 
-void askNumberPkg (void) ;
+void askNumberPkg (Window *w) ;
 void getNumberPkg(GtkWidget *widget, Window *w) ;
 void setPkgInputs (GtkWidget *widget, Window *w) ;
 PkgInputs * createPkgInputs (GtkWidget *grid) ;

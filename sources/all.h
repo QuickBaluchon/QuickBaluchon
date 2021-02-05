@@ -7,12 +7,7 @@
 #include <stdint.h>
 #include <gtk/gtk.h>
 #include <time.h>
-
-typedef struct UserData {
-    uint8_t id ;
-    char name[30] ;
-    char password[30] ;
-} UserData ;
+#include <curl/curl.h>
 
 typedef struct PkgInputs {
   GtkWidget *weight;
