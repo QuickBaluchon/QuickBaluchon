@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libraries/qrcodegen/qrcodegen.h"
+#include "../libraries/qrcodegen/qrcodegen.h"
 
 
 // Function prototypes
