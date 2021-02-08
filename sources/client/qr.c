@@ -24,36 +24,11 @@
  *   Software.
  */
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "../libraries/qrcodegen/qrcodegen.h"
-
-
-// Function prototypes
-static void createQRcode (char *text, uint16_t nb);
-static void printQr(const uint8_t qrcode[], char *file);
-
-
-// The main application program.
-int main (int argc, char **argv) {
-    uint8_t i ;
-    if (argc > 1) {
-        for (i = 1 ; i < argc ; ++i) {
-            createQRcode(argv[i], i);
-        }
-    } else {
-        printf("No arguments given\n") ;
-    }
-
-	return EXIT_SUCCESS;
-}
+ #include "all.h"
 
 
 // Creates a single QR Code, then prints it to the console and in a file.
-static void createQRcode (char *text, uint16_t nb) {
+void createQRcode (char *text, uint16_t nb) {
     char fileName[30] = "" ;
 	enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;  // Error correction level
 
@@ -63,14 +38,14 @@ static void createQRcode (char *text, uint16_t nb) {
 	bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
 		qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 	if (ok) {
-        sprintf(fileName, "qrCode-%d.txt", nb) ;
+        sprintf(fileName, "../../qrCodes/qrCode-%d.txt", nb) ;
 		printQr(qrcode, fileName);
     }
 }
 
 
 // Prints the given QR Code to the console.
-static void printQr(const uint8_t qrcode[], char *file) {
+void printQr(const uint8_t qrcode[], char *file) {
     FILE *qr = fopen(file, "w");
     if(qr == NULL)
         return ;
@@ -87,4 +62,6 @@ static void printQr(const uint8_t qrcode[], char *file) {
     }
     fputs("\n", stdout);
     fputs("\n", qr);
+
+    fclose(qr);
 }

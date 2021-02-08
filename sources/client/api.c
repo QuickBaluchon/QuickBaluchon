@@ -3,17 +3,34 @@
 int idUser = 0 ;
 
 void saveID (char *str, size_t size, size_t nmemb, void *stream) {
-    if (strlen(str) > 2)
+    if (strlen(str) > 1)
         sscanf(strchr(str, '"'), "\"id\": \"%d\"", &idUser);
     else
         idUser = 0 ;
 }
 
 void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
-    if (strlen(str) > 2)
-        sscanf(strchr(str, '"'), "\"id\": \"%d\"", &idUser);
-    else
-        idUser = 0 ;
+    char qrURL[100] ;
+    char *tok ;
+    char tmp[10] ;
+    uint16_t nb ;
+
+    if (strlen(str) > 1) {
+        tok = strtok(str, "\n") ;
+        while (tok != NULL) {
+            if (strstr(tok, " => ") != NULL) {
+                strcpy(tmp, strstr(tok, " => ") + 4) ;
+                nb = atoi(tmp) ;
+                if (nb == 0)
+                    continue ;
+                sprintf(qrURL, "https://quick-baluchon.herokuapp.com/package?no=%d", nb) ;
+                createQRcode(qrURL, nb) ;
+            }
+            tok = strtok(NULL, "\n") ;
+        }
+    } else {
+        printMessage(NULL, "An error occured") ;
+    }
 }
 
 uint8_t connectAPI (char *name, char *pwd) {
@@ -99,14 +116,14 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* Store the result of the query */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, saveID);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, readPkgNumbers);
 
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(res != CURLE_OK && res != CURLE_WRITE_ERROR)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
               curl_easy_strerror(res));
 

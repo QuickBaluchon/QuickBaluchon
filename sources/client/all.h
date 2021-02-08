@@ -2,13 +2,17 @@
 #define ALL
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <xlsxwriter.h>
 #include <stdint.h>
 #include <gtk/gtk.h>
 #include <time.h>
 #include <curl/curl.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include "libxl.h"
+#include "../libraries/qrcodegen/qrcodegen.h"
 
 typedef struct PkgInputs {
   GtkWidget *weight;
@@ -50,5 +54,6 @@ typedef struct Modify {
 #include "api.h"
 #include "excel.h"
 #include "gtk.h"
+#include "qr.h"
 
 #endif

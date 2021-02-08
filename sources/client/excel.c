@@ -23,13 +23,14 @@ void writeXLSX (GtkWidget *widget, Window *w) {
 
 
     uploadExcel(file, w->totalPkg) ;
+    remove(file) ;
 
     if (w->pkgData != NULL) {
         free(w->pkgData) ;
         w->pkgData = NULL;
     }
 
-    printf("Post api\n") ;
+    printMessage(NULL, "The QR codes have been generated") ;
 
     askNumberPkg(w) ;
 }
@@ -76,9 +77,6 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
             }
         }
     }
-
-    if(xlBookSave(book, fileName))
-        printf("File custom.xls has been created.\n");
     xlBookRelease(book);
     return 0 ;
 }

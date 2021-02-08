@@ -11,10 +11,10 @@ ALL_LIBS = $(LIBS) $(LIB_CURL) $(LIB_XL) $(LIB_EXWR)
 #C files
 CFILES_UP = upload.c
 CFILES_DOWN = download.c
-CFILES_QR = qr.c libraries/qrcodegen/qrcodegen.c
+CFILES_QR = qr.c ../libraries/qrcodegen/qrcodegen.c
 CFILES_EXWR = main.c excel.c gtk.c
 CFILES_API = api.c
-ALL_FILES = $(CFILES_EXWR) $(CFILES_API)
+ALL_FILES = $(CFILES_EXWR) $(CFILES_API) $(CFILES_QR)
 
 #Executable name
 EXE_UP = up
