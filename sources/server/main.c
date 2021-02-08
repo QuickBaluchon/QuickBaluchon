@@ -8,7 +8,7 @@
 uint16_t port = 3306 ;
 char *host = "localhost" ;
 char *usrn = "root" ;
-char *pwd = "" ;
+char *pwd = "root" ;
 char *dbname = "hedwige" ;
 
 

@@ -1,2 +1,3 @@
 *.xls
 .DS_Store
+qrCodes/*
