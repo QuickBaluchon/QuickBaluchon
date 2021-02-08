@@ -312,7 +312,11 @@ void getCredentials (GtkWidget *widget, Window *w) {
         printMessage(widget, "Wrong credentials");
         return ;
     }
-    free(w->data);
+    if (w->data != NULL) {
+        free(w->data);
+        w->data = NULL ;
+    }
+
     askNumberPkg(w) ;
 }
 
@@ -470,9 +474,14 @@ void modifyPkgData (GtkWidget *widget, uint8_t *i) {
     w = modify[*i].w ;
 
     w->modifPkg = *i ;
-    free(modify) ;
-    if (w->data != NULL)
+    if (modify != NULL) {
+        free(modify) ;
+        modify = NULL ;
+    }
+    if (w->data != NULL) {
         free(w->data) ;
+        w->data = NULL ;
+    }
 
     sprintf(w->winName, "Package %d/%d", w->modifPkg+1, w->totalPkg);
     gtk_window_set_title(GTK_WINDOW(w->window), (const gchar *)w->winName) ;
@@ -585,7 +594,10 @@ void getDataPkg (GtkWidget *widget, Window *w) {
 
     str[1] = '\0' ;
     pkgData->delay = atoi(str) ;
-    free(w->data) ;
+    if (w->data != NULL) {
+        free(w->data) ;
+        w->data = NULL ;
+    }
     setPkgInputs(widget, w) ;
 }
 

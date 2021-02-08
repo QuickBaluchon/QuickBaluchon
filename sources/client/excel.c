@@ -6,8 +6,10 @@ void writeXLSX (GtkWidget *widget, Window *w) {
     char file[30] = "" ;
 
     //free the buttons
-    if (w->data != NULL)
+    if (w->data != NULL){
         free(w->data) ;
+        w->data = NULL;
+    }
 
     if (createXLSXfile(file) != 0) {
         printMessage(NULL, "Error in creating the XLSX file") ;
@@ -19,8 +21,16 @@ void writeXLSX (GtkWidget *widget, Window *w) {
         return ;
     }
 
+
     uploadExcel(file, w->totalPkg) ;
-    free(w->pkgData) ;
+
+    if (w->pkgData != NULL) {
+        free(w->pkgData) ;
+        w->pkgData = NULL;
+    }
+
+    printf("Post api\n") ;
+
     askNumberPkg(w) ;
 }
 
@@ -67,39 +77,11 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
         }
     }
 
-    free(pkgData) ;
     if(xlBookSave(book, fileName))
         printf("File custom.xls has been created.\n");
     xlBookRelease(book);
     return 0 ;
 }
-
-/*
-uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
-    uint16_t row ;
-
-    lxw_workbook  *workbook  = workbook_new(fileName);
-    lxw_worksheet *worksheet = workbook_add_worksheet(workbook, NULL);
-    lxw_format    *format   = workbook_add_format(workbook);
-
-    format_set_num_format(format, "0.000");
-    writeLabels(worksheet) ;
-
-    for (row = 1 ; row <= totalPkg ; row++) {
-        worksheet_write_number(worksheet, row, 0, (float)pkgData[row-1].weight, format);
-        worksheet_write_number(worksheet, row, 1, pkgData[row-1].length, NULL);
-        worksheet_write_number(worksheet, row, 2, pkgData[row-1].height, NULL);
-        worksheet_write_number(worksheet, row, 3, pkgData[row-1].width, NULL);
-        worksheet_write_string(worksheet, row, 4, pkgData[row-1].emailRecipient, NULL);
-        worksheet_write_string(worksheet, row, 5, pkgData[row-1].addressRecipient, NULL);
-        worksheet_write_number(worksheet, row, 6, pkgData[row-1].delay, NULL);
-    }
-
-    free(pkgData) ;
-    workbook_close(workbook);
-    return 0 ;
-}
-*/
 
 void writeLabels (SheetHandle worksheet) {
     char cols[7][30] = {"weight", "length", "height", "width", "Recipient's mail", "Recipient's address", "Delay"};

@@ -9,6 +9,13 @@ void saveID (char *str, size_t size, size_t nmemb, void *stream) {
         idUser = 0 ;
 }
 
+void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
+    if (strlen(str) > 2)
+        sscanf(strchr(str, '"'), "\"id\": \"%d\"", &idUser);
+    else
+        idUser = 0 ;
+}
+
 uint8_t connectAPI (char *name, char *pwd) {
     CURL *curl;
     CURLcode res;
@@ -90,6 +97,9 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
     /* what URL that receives this POST */
     sprintf(url, "http://localhost:8888/QuickBaluchon/api/client/excel/%d/%d", idUser, totalPkg) ;
     curl_easy_setopt(curl, CURLOPT_URL, url);
+
+    /* Store the result of the query */
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, saveID);
 
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
