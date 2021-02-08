@@ -28,6 +28,8 @@ void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
             }
             tok = strtok(NULL, "\n") ;
         }
+
+        printMessage(NULL, "The QR codes have been generated") ;
     } else {
         printMessage(NULL, "An error occured") ;
     }

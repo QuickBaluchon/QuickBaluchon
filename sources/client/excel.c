@@ -23,14 +23,11 @@ void writeXLSX (GtkWidget *widget, Window *w) {
 
 
     uploadExcel(file, w->totalPkg) ;
-    remove(file) ;
 
     if (w->pkgData != NULL) {
         free(w->pkgData) ;
         w->pkgData = NULL;
     }
-
-    printMessage(NULL, "The QR codes have been generated") ;
 
     askNumberPkg(w) ;
 }
@@ -40,7 +37,7 @@ uint8_t createXLSXfile (char *fileName) {
     char time[22] = "" ;
 
     getDateTime(time) ;
-    sprintf(fileName, "%d-%s.xls", idUser, time) ;
+    sprintf(fileName, "../../Excel/%d-%s.xls", idUser, time) ;
 
     xlsx = fopen(fileName, "w+") ;
     if (xlsx == NULL)
@@ -56,6 +53,7 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
     uint8_t f, row;
     FormatHandle format;
     SheetHandle sheet;
+    char str[100] ;
 
     if (book) {
         //setup numeric format
@@ -76,6 +74,11 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
                 xlSheetWriteNum(sheet, row, 6, pkgData[row-1].delay, 0);
             }
         }
+    }
+
+    if (xlBookSave(book, fileName)) {
+        sprintf(str, "File %s has been created", fileName) ;
+        printMessage(NULL, str);
     }
     xlBookRelease(book);
     return 0 ;
