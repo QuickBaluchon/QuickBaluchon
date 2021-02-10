@@ -3,10 +3,20 @@
 int idUser = 0 ;
 
 void saveID (char *str, size_t size, size_t nmemb, void *stream) {
-    if (strlen(str) > 1)
-        sscanf(strchr(str, '"'), "\"id\": \"%d\"", &idUser);
+
+  char *strId = malloc(sizeof(char)*16);
+  if(strId == NULL) exit(1);
+
+    if (strlen(str) > 1){
+      int size = strchr(str, ',') - strstr(str, "\"id\": ");
+      strncpy(strId, strstr(str, "\"id\": "), size);
+      strId[ size - 1 ] = '\0';
+      strId += 7;
+      idUser = atoi(strId);
+    }
     else
-        idUser = 0 ;
+      idUser = 0 ;
+
 }
 
 void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
@@ -36,36 +46,32 @@ void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
 }
 
 uint8_t connectAPI (char *name, char *pwd) {
+
     CURL *curl;
     CURLcode res;
-
-    curl_mime *form = NULL;
-    curl_mimepart *field = NULL;
+    char fmt[32] = "{\"name\": \"%s\",\"password\": \"%s\"}";
+    char json[64];
     struct curl_slist *headerlist = NULL;
-    static const char buf[] = "Expect:";
 
     curl_global_init(CURL_GLOBAL_ALL);
 
     curl = curl_easy_init();
     if(curl) {
-      /* Create the form */
-      form = curl_mime_init(curl);
-
-      /* Fill in the filename field */
-      field = curl_mime_addpart(form);
-      curl_mime_name(field, "name");
-      curl_mime_data(field, name, CURL_ZERO_TERMINATED);
-
-      field = curl_mime_addpart(form);
-      curl_mime_name(field, "password");
-      curl_mime_data(field, pwd, CURL_ZERO_TERMINATED);
 
       /* initialize custom header list (stating that Expect: 100-continue is not
          wanted */
-      headerlist = curl_slist_append(headerlist, buf);
+      headerlist = curl_slist_append(headerlist, "Expect:");
+      headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+
+      /* set the json with data:  {"name": {name},"password": {pwd} } */
+      sprintf(json, fmt, name, pwd);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
+
       /* what URL that receives this POST */
       curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/QuickBaluchon/api/client/login");
-      curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
+      //curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
       /* Store the result of the query */
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, saveID);
@@ -80,8 +86,6 @@ uint8_t connectAPI (char *name, char *pwd) {
       /* always cleanup */
       curl_easy_cleanup(curl);
 
-      /* then cleanup the form */
-      curl_mime_free(form);
       /* free slist */
       curl_slist_free_all(headerlist);
     }
@@ -132,8 +136,6 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    /* then cleanup the form */
-    curl_mime_free(form);
     /* free slist */
     curl_slist_free_all(headerlist);
   }
