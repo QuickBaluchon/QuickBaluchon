@@ -8,7 +8,7 @@
 uint16_t port = 3306 ;
 char *host = "localhost" ;
 char *usrn = "root" ;
-char *pwd = "root" ;
+char *pwd = "" ;
 char *dbname = "hedwige" ;
 
 
@@ -76,7 +76,7 @@ uint8_t saveData (Data *datas, char **argv) {
     }
     for (uint8_t i = 0; i < atoi(argv[3]); i++) {
         strcpy(insert, "") ;
-        sprintf(insert, "INSERT INTO package (weight, volume, address, email, delay, client) VALUES (%lf, %lf, '%s', '%s', %d, %d)",
+        sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client) VALUES (%lf, %lf, '%s', '%s', %d, %d);",
             datas[i].weight,
             datas[i].length * datas[i].height * datas[i].width,
             datas[i].emailRecipient,
@@ -85,7 +85,10 @@ uint8_t saveData (Data *datas, char **argv) {
             atoi(argv[2])
         );
 
-        mysql_query(&mysql, insert);
+        if(mysql_query(&mysql, insert)){      // mysql_query returns 0 if sucess
+          printf("Unable to insert data in DB\n" );
+          exit(1);
+        }
         printf("%d\n", getPkgNumber()) ;
     }
     mysql_close(&mysql);
@@ -111,8 +114,13 @@ int16_t getPkgNumber (void) {
         results = mysql_use_result(&mysql) ;
         if (results == NULL)
             return 0 ;
-        row = mysql_fetch_row(results) ;
-        nb = atoi(row[0]) ;
+
+        if( row = mysql_fetch_row(results), (row[0]) )
+          nb = atoi(row[0]) ;
+        else {
+          printf("Error select max id\n");
+          exit(1);
+        }
         mysql_close(&mysql);
     }
     return nb ;

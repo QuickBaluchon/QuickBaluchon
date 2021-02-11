@@ -25,6 +25,8 @@ void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
     char tmp[10] ;
     uint16_t nb ;
 
+    printf("\n%s\n", str);
+
     if (strlen(str) > 1) {
         tok = strtok(str, "\n") ;
         while (tok != NULL) {
@@ -34,7 +36,10 @@ void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
                 if (nb == 0)
                     continue ;
                 sprintf(qrURL, "https://quick-baluchon.herokuapp.com/package?no=%d", nb) ;
-                createQRcode(qrURL, nb) ;
+                if(createQRcode(qrURL, nb)) {   // createQRcode returns 0 if success
+                  printMessage(NULL, "Unable to create the QrCode") ;
+                  return;
+                }
             }
             tok = strtok(NULL, "\n") ;
         }
@@ -100,7 +105,6 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
   curl_mime *form = NULL;
   curl_mimepart *field = NULL;
   struct curl_slist *headerlist = NULL;
-  static const char buf[] = "Expect:";
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -116,7 +120,9 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
 
     /* initialize custom header list (stating that Expect: 100-continue is not
        wanted */
-    headerlist = curl_slist_append(headerlist, buf);
+    headerlist = curl_slist_append(headerlist, "Expect:");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+
     /* what URL that receives this POST */
     sprintf(url, "http://localhost:8888/QuickBaluchon/api/client/excel/%d/%d", idUser, totalPkg) ;
     curl_easy_setopt(curl, CURLOPT_URL, url);

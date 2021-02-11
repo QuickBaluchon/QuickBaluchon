@@ -1,5 +1,4 @@
 #include "all.h"
-
 extern int idUser ;
 
 void writeXLSX (GtkWidget *widget, Window *w) {

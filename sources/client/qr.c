@@ -28,7 +28,7 @@
 
 
 // Creates a single QR Code, then prints it to the console and in a file.
-void createQRcode (char *text, uint16_t nb) {
+uint8_t createQRcode (char *text, uint16_t nb) {
     char fileName[30] = "" ;
 	enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;  // Error correction level
 
@@ -38,17 +38,19 @@ void createQRcode (char *text, uint16_t nb) {
 	bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
 		qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 	if (ok) {
-        sprintf(fileName, "../../qrCodes/qrCode-%d.txt", nb) ;
-		printQr(qrcode, fileName);
-    }
+    sprintf(fileName, "../../qrCodes/qrCode-%d.txt", nb) ;
+		if(printQr(qrcode, fileName)) return 1;
+    else return 0;
+  }else
+    return 1;
 }
 
 
 // Prints the given QR Code to the console.
-void printQr(const uint8_t qrcode[], char *file) {
+uint8_t printQr(const uint8_t qrcode[], char *file) {
     FILE *qr = fopen(file, "w");
     if(qr == NULL)
-        return ;
+        return 1;
 
     int size = qrcodegen_getSize(qrcode);
     int border = 4;
@@ -64,4 +66,5 @@ void printQr(const uint8_t qrcode[], char *file) {
     fputs("\n", qr);
 
     fclose(qr);
+    return 0;
 }
