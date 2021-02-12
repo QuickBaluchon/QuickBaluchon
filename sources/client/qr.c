@@ -26,8 +26,21 @@
 
  #include "all.h"
 
+ /*
+ Function : createQRcode
+ --------------------------------------------------------------------------------
+ Creates a single QR Code
+ Calls
+    qr.c/(printQr) to print it in the console and in a file
 
-// Creates a single QR Code, then prints it to the console and in a file.
+ --------------------------------------------------------------------------------
+ char *name : user's username
+ char *pwd : user's password
+ --------------------------------------------------------------------------------
+ Return values
+     0 if all went well
+     1 otherwwise
+ */
 uint8_t createQRcode (char *text, uint16_t nb) {
     char fileName[30] = "" ;
 	enum qrcodegen_Ecc errCorLvl = qrcodegen_Ecc_LOW;  // Error correction level
@@ -38,15 +51,26 @@ uint8_t createQRcode (char *text, uint16_t nb) {
 	bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, errCorLvl,
 		qrcodegen_VERSION_MIN, qrcodegen_VERSION_MAX, qrcodegen_Mask_AUTO, true);
 	if (ok) {
-    sprintf(fileName, "../../qrCodes/qrCode-%d.txt", nb) ;
-		if(printQr(qrcode, fileName)) return 1;
-    else return 0;
-  }else
+        sprintf(fileName, "../../qrCodes/qrCode-%d.txt", nb) ;
+    		if(printQr(qrcode, fileName)) return 1;
+        return 0;
+    }
     return 1;
 }
 
+/*
+Function : createQRcode
+--------------------------------------------------------------------------------
+Prints the given QR Code to the console and in a file
 
-// Prints the given QR Code to the console.
+--------------------------------------------------------------------------------
+const uint8_t qrCode[] : array of integers (numeric QRcode)
+char *file : string with the name of the file
+--------------------------------------------------------------------------------
+Return values
+    0 if all went well
+    1 otherwwise
+*/
 uint8_t printQr(const uint8_t qrcode[], char *file) {
     FILE *qr = fopen(file, "w");
     if(qr == NULL)

@@ -1,6 +1,22 @@
 #include "all.h"
 extern int idUser ;
 
+/*
+Function : writeXLSX
+--------------------------------------------------------------------------------
+Handles the writing process in an excel file
+Calls
+    excel.c/(createXLSXfile) to create a file with a specific name
+    excel.c/(writeData) to write the package data in the Excel file
+    excel.c/(uploadExcel) to send the Excel file to the server
+    gtk.c/(askNumberPkg) to prompt a new entry of packages
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
+*/
 void writeXLSX (GtkWidget *widget, Window *w) {
     char file[30] = "" ;
 
@@ -31,6 +47,18 @@ void writeXLSX (GtkWidget *widget, Window *w) {
     askNumberPkg(w) ;
 }
 
+/*
+Function : createXLSXfile
+--------------------------------------------------------------------------------
+Creates a file with the user's id and the current datetime
+Calls
+    excel.c/(getDateTime) to get a string with the current datetime
+
+--------------------------------------------------------------------------------
+char *fileName : string to save the name of the file
+--------------------------------------------------------------------------------
+
+*/
 uint8_t createXLSXfile (char *fileName) {
     FILE *xlsx ;
     char time[22] = "" ;
@@ -46,7 +74,19 @@ uint8_t createXLSXfile (char *fileName) {
     return 0 ;
 }
 
+/*
+Function : writeData
+--------------------------------------------------------------------------------
+Writes the data in the Excel file using the libxl library
+Calls
+    excel.c/(writeLabels) to write the labels
 
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
+*/
 uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
     BookHandle book = xlCreateBook();
     uint8_t f, row;
@@ -83,13 +123,32 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
     return 0 ;
 }
 
+/*
+Function : writeLabels
+--------------------------------------------------------------------------------
+Writes the package data labels in a worksheet
+
+--------------------------------------------------------------------------------
+SheetHandle worksheet : worksheet in use
+--------------------------------------------------------------------------------
+
+*/
 void writeLabels (SheetHandle worksheet) {
     char cols[7][30] = {"weight", "length", "height", "width", "Recipient's mail", "Recipient's address", "Delay"};
     for (int i = 0 ; i < 7 ; ++i)
         xlSheetWriteStr(worksheet, 0, i, cols[i], 0) ;
 }
 
+/*
+Function : getDateTime
+--------------------------------------------------------------------------------
+Writes the current date and time (GMT) in a string
 
+--------------------------------------------------------------------------------
+char *dt : string to store the outcome
+--------------------------------------------------------------------------------
+
+*/
 void getDateTime (char *dt) {
     int h, min, s, day, month, year;
     time_t now = time(NULL);

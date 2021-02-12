@@ -2,7 +2,7 @@
 
 extern int idUser ;
 
-Modify *modify; //ON ASSUME, C BON Y'A QUOI ? mangetesmorts(){ }
+Modify *modify;
 /*
 Function : hello
 --------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ void printMessage (GtkWidget *widget, char *message) {
 /*
 Function : createWindow
 --------------------------------------------------------------------------------
-Creates a gtk window
+Creates a GTK window
 
 --------------------------------------------------------------------------------
 char *windowTitle : title given to the window
@@ -206,7 +206,8 @@ void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) {
 Function : retrieveInteger
 --------------------------------------------------------------------------------
 Retrieves an integer from a GtkEntry
-Calls gtk.c/(retrieveData) to retrieve the entry as a string before converting it
+Calls
+    gtk.c/(retrieveData) to retrieve the entry as a string before converting it
 
 --------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by callback function
@@ -239,7 +240,8 @@ uint8_t retrieveInteger (GtkWidget *widget, GtkWidget *input, int16_t *integer) 
 Function : retrieveDouble
 --------------------------------------------------------------------------------
 Retrieves a double from a GtkEntry
-Calls gtk.c/(retrieveData) to retrieve the entry as a string before converting it
+Calls
+    gtk.c/(retrieveData) to retrieve the entry as a string before converting it
 
 --------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by callback function
@@ -266,15 +268,35 @@ uint8_t retrieveDouble (GtkWidget *widget, GtkWidget *input, double *nb) {
     return 0 ;
 }
 
+/*
+Function : initProg
+--------------------------------------------------------------------------------
+Launches the program
+Calls
+    gtk.c/(askCredentials) to login the user
 
+--------------------------------------------------------------------------------
+int argc : number of arguments sent when launching the program
+char **argv : array of string arguments sent when launching the program
+--------------------------------------------------------------------------------
+
+*/
 void initProg (int argc, char **argv) {
     gtk_init(&argc, &argv);
     askCredentials() ;
-    //askNumberPkg() ;
     gtk_main() ;
 }
 
+/*
+Function : askCredentials
+--------------------------------------------------------------------------------
+Opens a window asking for the client's credentials
+Calls
+    gtk.c/(getCredentials) to retrieve the username and password
 
+--------------------------------------------------------------------------------
+
+*/
 void askCredentials (void) {
     Window *w = malloc(sizeof(Window)) ;
     GtkWidget *button;
@@ -300,6 +322,20 @@ void askCredentials (void) {
     gtk_widget_show_all(w->window) ;
 }
 
+/*
+Function : getCredentials
+--------------------------------------------------------------------------------
+Retrieves the data from the credentials entries
+Calls
+    api.c/(connectAPI) to connect the user to the database
+    gtk.c/(askNumberPkg) if the connection succeeded
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
+*/
 void getCredentials (GtkWidget *widget, Window *w) {
     char *username ;
     char *pwd ;
@@ -320,12 +356,17 @@ void getCredentials (GtkWidget *widget, Window *w) {
     askNumberPkg(w) ;
 }
 
-
 /*
 Function : askNumberPkg
 --------------------------------------------------------------------------------
-Open a window that asks how many packages will be sent
-Calls gtk.c/(getNumberPkg) when the button is clicked
+Opens a window asking how many packages will be sent
+Calls
+    gtk.c/(getNumberPkg) when the button is clicked
+
+--------------------------------------------------------------------------------
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
 */
 void askNumberPkg (Window *w) {
     GtkWidget *button;
@@ -353,11 +394,14 @@ void askNumberPkg (Window *w) {
 Function : getNumberPkg
 --------------------------------------------------------------------------------
 Retrieves the number of packages that will be delivered
-Calls gtk.c/(retrieveInteger) to retrieve the entry as an integer
+Calls
+    gtk.c/(retrieveInteger) to retrieve the entry as an integer
+    gtk.c/(setPkgInputs) to create the inputs for a package data
 
 --------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by callback function
-Window *w : the window structure
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
 
 */
 void getNumberPkg(GtkWidget *widget, Window *w) {
@@ -375,6 +419,22 @@ void getNumberPkg(GtkWidget *widget, Window *w) {
     setPkgInputs(widget, w);
 }
 
+/*
+Function : setPkgInputs
+--------------------------------------------------------------------------------
+Opens a window for the package data (weight, height, length, width, etc.)
+If the maximum number of packages has been reached, continues the program
+Calls
+    gtk.c/(createPkgInputs) to create the inputs
+    gtk.c/(getDataPkg) to retrieve the data in the inputs
+    gtk.c/(printPkgs) to continue and print the data of all the packages
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
+*/
 void setPkgInputs (GtkWidget *widget, Window *w) {
     GtkWidget *button ;
     w->currentPkg++ ;
@@ -399,7 +459,21 @@ void setPkgInputs (GtkWidget *widget, Window *w) {
     }
 }
 
-void printPkgs(GtkWidget *widget, Window *w) {
+/*
+Function : printPkgs
+--------------------------------------------------------------------------------
+Opens a window to print the data of all the packages
+Calls
+    excel.c/(writeXLSX) to write the data in an Excel file
+    gtk.c/(printPkgData) to set all the labels
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
+*/
+void printPkgs (GtkWidget *widget, Window *w) {
     char cols[7][30] = {"Weight", "Length", "Height", "Width", "Recipient's mail", "Recipient's address", "Delay"};
     uint8_t i ;
     GtkWidget *button ;
@@ -422,6 +496,18 @@ void printPkgs(GtkWidget *widget, Window *w) {
     gtk_widget_show_all(w->window) ;
 }
 
+/*
+Function : printPkgData
+--------------------------------------------------------------------------------
+Prints the data of all the packages
+Calls
+    gtk.c/(modifyPkgData) to update the data of a package
+
+--------------------------------------------------------------------------------
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
+*/
 void printPkgData (Window *w) {
     GtkWidget **button = malloc(sizeof(GtkWidget *) * w->totalPkg);
     char str[15] = "" ;
@@ -466,6 +552,21 @@ void printPkgData (Window *w) {
     }
 }
 
+/*
+Function : modifyPkgData
+--------------------------------------------------------------------------------
+Opens a window to modify the data of a package
+Calls
+    gtk.c/(createPkgInputs) to create the inputs
+    gtk.c/(getPkgValues) to set the data already inserted
+    gtk.c/(getDataPkg) to retrieve the modified data from the inputs
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+uint8_t *i : pointer to the number of the package being modified
+--------------------------------------------------------------------------------
+
+*/
 void modifyPkgData (GtkWidget *widget, uint8_t *i) {
     Window *w ;
     GtkWidget *button ;
@@ -499,7 +600,18 @@ void modifyPkgData (GtkWidget *widget, uint8_t *i) {
     gtk_widget_show_all(w->window) ;
 }
 
-void getPkgValues(Window *w, uint8_t i) {
+/*
+Function : getPkgValues
+--------------------------------------------------------------------------------
+Fills the inputs with the values of a selected package
+
+--------------------------------------------------------------------------------
+Window *w : pointer to the structure containing all the data of the window
+uint8_t i : the number of the selected package in the array of packages
+--------------------------------------------------------------------------------
+
+*/
+void getPkgValues (Window *w, uint8_t i) {
     PkgInputs *inputs = w->data ;
     char str[10] = "" ;
     char strl[100] = "" ;
@@ -560,6 +672,21 @@ PkgInputs * createPkgInputs (GtkWidget *grid) {
     return inputs ;
 }
 
+/*
+Function : getDataPkg
+--------------------------------------------------------------------------------
+Retrieves the data of a package from the inputs
+Calls
+    gtk.c/(getDataPkgDoubles) to retrieve the height, length, width and length
+    gtk.c/(retrieveData) to retrieve the email and the address
+    gtk.c/(retrieveInteger) to retrieve the delivery delay
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+Window *w : pointer to the structure containing all the data of the window
+--------------------------------------------------------------------------------
+
+*/
 void getDataPkg (GtkWidget *widget, Window *w) {
     char *str ;
     PkgInputs *inputs = w->data ;
@@ -588,7 +715,7 @@ void getDataPkg (GtkWidget *widget, Window *w) {
 
     retrieveComboBoxContent(widget, inputs->delay, &str) ;
     if (str == NULL) {
-        printMessage(widget, "Empty deadline") ;
+        printMessage(widget, "Empty delay") ;
         return ;
     }
 
@@ -601,6 +728,20 @@ void getDataPkg (GtkWidget *widget, Window *w) {
     setPkgInputs(widget, w) ;
 }
 
+/*
+Function : getDataPkgDoubles
+--------------------------------------------------------------------------------
+Gets the floating values of the height, width, length and weight
+Calls
+    gtk.c/(retrieveDouble) to retrieve a double from the entry
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+PkgInputs *pkg : array of inputs
+PkgData *pkgData : array of packages
+--------------------------------------------------------------------------------
+
+*/
 void getDataPkgDoubles (GtkWidget *widget, PkgInputs *pkg, PkgData *pkgData) {
     double tmp ;
 
@@ -633,6 +774,16 @@ void getDataPkgDoubles (GtkWidget *widget, PkgInputs *pkg, PkgData *pkgData) {
     pkgData->width = tmp ;
 }
 
+/*
+Function : checkEmail
+--------------------------------------------------------------------------------
+Checks the standard format for an email
+
+--------------------------------------------------------------------------------
+char *email : string of the email
+--------------------------------------------------------------------------------
+
+*/
 uint8_t checkEmail (char *email) {
     char *at ;
     char *point ;
@@ -655,6 +806,16 @@ uint8_t checkEmail (char *email) {
     return 0 ;
 }
 
+/*
+Function : checkDouble
+--------------------------------------------------------------------------------
+Checks if the double is a positive value
+
+--------------------------------------------------------------------------------
+double d : double to check
+--------------------------------------------------------------------------------
+
+*/
 uint8_t checkDouble (double d) {
     return d > 0 ? 0 : 1 ;
 }

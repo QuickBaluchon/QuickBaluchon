@@ -2,23 +2,50 @@
 
 int idUser = 0 ;
 
-void saveID (char *str, size_t size, size_t nmemb, void *stream) {
+/*
+Function : saveID
+--------------------------------------------------------------------------------
+Sets the user's ID from the cURL connection request response (0 if none found)
 
+--------------------------------------------------------------------------------
+char *str : data delivered by curl
+size_t size : always 1
+size_t nmemb : length of the curl output
+void *stream : stream to write the data into (stdout if none specified)
+--------------------------------------------------------------------------------
+
+*/
+void saveID (char *str, size_t size, size_t nmemb, void *stream) {
   char *strId = malloc(sizeof(char)*16);
+  int length ;
   if(strId == NULL) exit(1);
 
-    if (strlen(str) > 1){
-      int size = strchr(str, ',') - strstr(str, "\"id\": ");
-      strncpy(strId, strstr(str, "\"id\": "), size);
-      strId[ size - 1 ] = '\0';
+    if (nmemb > 1){
+      length = strchr(str, ',') - strstr(str, "\"id\": ");
+      strncpy(strId, strstr(str, "\"id\": "), length);
+      strId[ length - 1 ] = '\0';
       strId += 7;
       idUser = atoi(strId);
     }
     else
       idUser = 0 ;
-
 }
 
+/*
+Function : readPkgNumbers
+--------------------------------------------------------------------------------
+Reads the IDs of the packages just inserted in the database
+Calls
+    qr.c/(createQRcode) to generate a QRcode for each of the packages
+
+--------------------------------------------------------------------------------
+char *str : data delivered by curl
+size_t size : always 1
+size_t nmemb : length of the curl output
+void *stream : stream to write the data into (stdout if none specified)
+--------------------------------------------------------------------------------
+
+*/
 void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
     char qrURL[100] ;
     char *tok ;
@@ -50,8 +77,20 @@ void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
     }
 }
 
-uint8_t connectAPI (char *name, char *pwd) {
+/*
+Function : connectAPI
+--------------------------------------------------------------------------------
+Connects to the API on the server with cURL to check the user's credentials
 
+--------------------------------------------------------------------------------
+char *name : user's username
+char *pwd : user's password
+--------------------------------------------------------------------------------
+Return values
+    0 if all went well
+    the curl error code if an error occured
+*/
+uint8_t connectAPI (char *name, char *pwd) {
     CURL *curl;
     CURLcode res;
     char fmt[32] = "{\"name\": \"%s\",\"password\": \"%s\"}";
@@ -85,8 +124,7 @@ uint8_t connectAPI (char *name, char *pwd) {
       res = curl_easy_perform(curl);
       /* Check for errors */
       if(res != CURLE_OK && res != CURLE_WRITE_ERROR)
-        fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
+        return res ;
 
       /* always cleanup */
       curl_easy_cleanup(curl);
@@ -97,6 +135,19 @@ uint8_t connectAPI (char *name, char *pwd) {
     return 0;
 }
 
+/*
+Function : connectAPI
+--------------------------------------------------------------------------------
+Sends the file to the API with cURL
+
+--------------------------------------------------------------------------------
+char *fileName : path to the file to be sent
+uint8_t totalPkg : total number of packages being sent
+--------------------------------------------------------------------------------
+Return values
+    0 if all went well
+    the curl error code if an error occured
+*/
 uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
   CURL *curl;
   CURLcode res;
@@ -136,8 +187,7 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK && res != CURLE_WRITE_ERROR)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+      return res ;
 
     /* always cleanup */
     curl_easy_cleanup(curl);
