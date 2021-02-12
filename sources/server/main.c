@@ -35,7 +35,18 @@ int main (int argc, char **argv) {
     return 0;
 }
 
+/*
+Function : readData
+--------------------------------------------------------------------------------
+Reads the data from an XLS file
+Calls
+    (saveData) to insert the data in the database
 
+--------------------------------------------------------------------------------
+char **argv : array containing the name of the excel file and the number of packages
+--------------------------------------------------------------------------------
+
+*/
 void readData (char **argv) {
     Data *datas = malloc(sizeof(Data) * atoi(argv[3]));
     BookHandle book = xlCreateBook();
@@ -62,7 +73,19 @@ void readData (char **argv) {
 }
 
 
+/*
+Function : saveData
+--------------------------------------------------------------------------------
+Connects to the mysql database to insert the data
 
+--------------------------------------------------------------------------------
+Datas *data : structure containing the package data
+char **argv : array containing the name of the excel file and the number of packages
+--------------------------------------------------------------------------------
+Return values
+    1 if an error occured
+    0 otherwise
+*/
 uint8_t saveData (Data *datas, char **argv) {
     MYSQL mysql;
     mysql_init(&mysql);
@@ -96,6 +119,16 @@ uint8_t saveData (Data *datas, char **argv) {
     return 0 ;
 }
 
+/*
+Function : getPkgNumber
+--------------------------------------------------------------------------------
+Selects the maximal id in the package table
+
+--------------------------------------------------------------------------------
+Return values
+    the id of the package
+    -1 if couldn't connect to the database
+*/
 int16_t getPkgNumber (void) {
     MYSQL mysql;
     mysql_init(&mysql);
