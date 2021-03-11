@@ -107,8 +107,8 @@ uint8_t saveData (Data *datas, char **argv) {
         sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client) VALUES (%lf, %lf, '%s', '%s', %d, %d)",
             datas[i].weight,
             datas[i].length * datas[i].height * datas[i].width,
-            datas[i].emailRecipient,
             datas[i].addressRecipient,
+            datas[i].emailRecipient,
             datas[i].delay,
             atoi(argv[2])
         );
