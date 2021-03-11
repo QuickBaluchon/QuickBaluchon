@@ -4,6 +4,7 @@
 #include <string.h>
 #include <mysql/mysql.h>
 #include <stdint.h>
+#include <curl/curl.h>
 
 uint16_t port = 3306 ;
 char *host = "localhost" ;
@@ -24,7 +25,7 @@ typedef struct Data {
 
 void readData (char **argv);
 uint8_t saveData (Data *datas, char **argv) ;
-int16_t getPkgNumber (void) ;
+void printReturn (char *str, size_t size, size_t nmemb, void *stream) ;
 
 
 int main (int argc, char **argv) {
@@ -33,6 +34,11 @@ int main (int argc, char **argv) {
 
     readData(argv);
     return 0;
+}
+
+
+void printReturn (char *str, size_t size, size_t nmemb, void *stream) {
+  printf("%s", str) ;
 }
 
 /*
@@ -68,6 +74,7 @@ void readData (char **argv) {
 
         xlBookRelease(book);
     }
+
     saveData(datas, argv) ;
     free(datas);
 }
@@ -87,19 +94,16 @@ Return values
     0 otherwise
 */
 uint8_t saveData (Data *datas, char **argv) {
-    MYSQL mysql;
-    mysql_init(&mysql);
-    mysql_options(&mysql,MYSQL_READ_DEFAULT_GROUP,"option");
-    char insert[300] = "";
+    CURL *curl;
+    CURLcode res;
+    struct curl_slist *headerlist = NULL;
+    curl_global_init(CURL_GLOBAL_ALL);
 
-    if (mysql_real_connect(&mysql, host, usrn, pwd, dbname, port, NULL, 0) == NULL) {
-        printf("Unable to connect to mysql\n");
-        mysql_close(&mysql);
-        return 1 ;
-    }
+    char insert[300] = "";
+    char json[400] = "";
     for (uint8_t i = 0; i < atoi(argv[3]); i++) {
         strcpy(insert, "") ;
-        sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client) VALUES (%lf, %lf, '%s', '%s', %d, %d);",
+        sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client) VALUES (%lf, %lf, '%s', '%s', %d, %d)",
             datas[i].weight,
             datas[i].length * datas[i].height * datas[i].width,
             datas[i].emailRecipient,
@@ -107,54 +111,40 @@ uint8_t saveData (Data *datas, char **argv) {
             datas[i].delay,
             atoi(argv[2])
         );
+        strcat(strcat(strcpy(json,"{ \"insert\": \""), insert), "\"}");
 
-        if(mysql_query(&mysql, insert)){      // mysql_query returns 0 if sucess
-          printf("Unable to insert data in DB\n" );
-          exit(1);
+        curl = curl_easy_init();
+        if(curl) {
+          /* initialize custom header list (stating that Expect: 100-continue is not
+             wanted */
+          headerlist = curl_slist_append(headerlist, "Expect:");
+          headerlist = curl_slist_append(headerlist, "Content-Type: application/json");
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
+
+          /* what URL that receives this POST */
+          curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/QuickBaluchonWeb/api/package/");
+          //curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
+
+
+          /* Store the result of the query */
+          curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, printReturn);
+
+          /* Perform the request, res will get the return code */
+          res = curl_easy_perform(curl);
+          /* Check for errors */
+          if(res != CURLE_OK && res != CURLE_WRITE_ERROR)
+            return res ;
+
+          /* always cleanup */
+          curl_easy_cleanup(curl);
+
+          /* free slist */
+          curl_slist_free_all(headerlist);
         }
-        printf("%d\n", getPkgNumber()) ;
+
     }
-    mysql_close(&mysql);
-
-    return 0 ;
-}
-
-/*
-Function : getPkgNumber
---------------------------------------------------------------------------------
-Selects the maximal id in the package table
-
---------------------------------------------------------------------------------
-Return values
-    the id of the package
-    -1 if couldn't connect to the database
-*/
-int16_t getPkgNumber (void) {
-    MYSQL mysql;
-    mysql_init(&mysql);
-    mysql_options(&mysql,MYSQL_READ_DEFAULT_GROUP,"option");
-    char *selectMax = "SELECT MAX(id) FROM PACKAGE" ;
-    MYSQL_ROW row ;
-    MYSQL_RES *results ;
-    uint16_t nb = 0 ;
-
-    if(mysql_real_connect(&mysql, host, usrn, pwd, dbname, port, NULL, 0) == NULL){
-        printf("Unable to connect to mysql\n");
-        mysql_close(&mysql);
-        return -1 ;
-    } else {
-        mysql_query(&mysql, selectMax);
-        results = mysql_use_result(&mysql) ;
-        if (results == NULL)
-            return 0 ;
-
-        if( row = mysql_fetch_row(results), (row[0]) )
-          nb = atoi(row[0]) ;
-        else {
-          printf("Error select max id\n");
-          exit(1);
-        }
-        mysql_close(&mysql);
-    }
-    return nb ;
+    return 0;
 }
