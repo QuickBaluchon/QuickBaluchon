@@ -47,34 +47,27 @@ void *stream : stream to write the data into (stdout if none specified)
 --------------------------------------------------------------------------------
 
 */
-void readPkgNumbers (char *str, size_t size, size_t nmemb, void *stream) {
+void readPkgNumber (char *str, size_t size, size_t nmemb, void *stream) {
     char qrURL[100] ;
-    char *tok = NULL;
+    char *tokArrow ;
+    char *tokLineBreak ;
     char tmp[10] ;
     uint16_t nb ;
-    printf("\n%s\n", str);
 
-    if (strlen(str) > 1) {
-        while (tok != NULL && !strncmp(tok, ")\n", 2)) {
+    tokArrow = strstr(str, " => ") ;
+    while (tokArrow != NULL) {
+        tokLineBreak = strstr(tokArrow, "\n") ;
+        strncat(strcpy(tmp, ""), tokArrow + 4, tokLineBreak - tokArrow) ;
 
-            if (strstr(tok, " => ") != NULL) {
-                strcpy(tmp, strstr(tok, " => ") + 4) ;
-                nb = atoi(tmp) ;
-                if (nb == 0)
-                    continue ;
-                sprintf(qrURL, "http://quick-baluchon.herokuapp.com/package/%d", nb) ;
-                if(createQRcode(qrURL, nb)) {   // createQRcode returns 0 if success
-                  printMessage(NULL, "Unable to create the QrCode") ;
-                  return;
-                }
-            }
-            tok = strtok(NULL, "\n") ;
+        sscanf(tmp, "\"%d\"", &nb) ;
+        tokArrow = strstr(tokArrow + 4, " => ") ;
 
+        sprintf(qrURL, "http://quick-baluchon.herokuapp.com/package/%d", nb) ;
+        if(createQRcode(qrURL, nb)) {   // createQRcode returns 0 if success
+          printMessage(NULL, "Unable to create the QrCode") ;
+          return;
         }
-
         printMessage(NULL, "The QR codes have been generated") ;
-    } else {
-        printMessage(NULL, "An error occured") ;
     }
 }
 
@@ -115,7 +108,7 @@ uint8_t connectAPI (char *name, char *pwd) {
       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
 
       /* what URL that receives this POST */
-      curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/QuickBaluchonWeb/api/client/login");
+      curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/api/client/login");
       //curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
       /* Store the result of the query */
@@ -176,11 +169,11 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 
     /* what URL that receives this POST */
-    sprintf(url, "http://localhost:8888/QuickBaluchonWeb/api/client/excel/%d/%d", idUser, totalPkg) ;
+    sprintf(url, "http://localhost:8888/api/client/excel/%d/%d", idUser, totalPkg) ;
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* Store the result of the query */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, readPkgNumbers);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, readPkgNumber);
 
     curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 

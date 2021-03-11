@@ -38,7 +38,7 @@ int main (int argc, char **argv) {
 
 
 void printReturn (char *str, size_t size, size_t nmemb, void *stream) {
-  printf("%s", str) ;
+    printf("%s\n", str) ;
 }
 
 /*
@@ -97,11 +97,12 @@ uint8_t saveData (Data *datas, char **argv) {
     CURL *curl;
     CURLcode res;
     struct curl_slist *headerlist = NULL;
-    curl_global_init(CURL_GLOBAL_ALL);
 
     char insert[300] = "";
     char json[400] = "";
     for (uint8_t i = 0; i < atoi(argv[3]); i++) {
+        curl_global_init(CURL_GLOBAL_ALL);
+
         strcpy(insert, "") ;
         sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client) VALUES (%lf, %lf, '%s', '%s', %d, %d)",
             datas[i].weight,
@@ -125,7 +126,7 @@ uint8_t saveData (Data *datas, char **argv) {
           curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
 
           /* what URL that receives this POST */
-          curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/QuickBaluchonWeb/api/package/");
+          curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/api/package/");
           //curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
 
@@ -138,13 +139,14 @@ uint8_t saveData (Data *datas, char **argv) {
           if(res != CURLE_OK && res != CURLE_WRITE_ERROR)
             return res ;
 
-          /* always cleanup */
-          curl_easy_cleanup(curl);
 
-          /* free slist */
-          curl_slist_free_all(headerlist);
+
         }
 
     }
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+    /* free slist */
+    curl_slist_free_all(headerlist);
     return 0;
 }

@@ -39,7 +39,7 @@
  --------------------------------------------------------------------------------
  Return values
      0 if all went well
-     1 otherwwise
+     1 otherwise
  */
 uint8_t createQRcode (char *text, uint16_t nb) {
     char fileName[30] = "" ;
