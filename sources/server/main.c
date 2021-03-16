@@ -104,13 +104,14 @@ uint8_t saveData (Data *datas, char **argv) {
         curl_global_init(CURL_GLOBAL_ALL);
 
         strcpy(insert, "") ;
-        sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client) VALUES (%lf, %lf, '%s', '%s', %d, %d)",
+        sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client, excelPath) VALUES (%lf, %lf, '%s', '%s', %d, %d, '/%s')",
             datas[i].weight,
             datas[i].length * datas[i].height * datas[i].width,
             datas[i].addressRecipient,
             datas[i].emailRecipient,
             datas[i].delay,
-            atoi(argv[2])
+            atoi(argv[2]),
+            argv[1]
         );
         strcat(strcat(strcpy(json,"{ \"insert\": \""), insert), "\"}");
 
