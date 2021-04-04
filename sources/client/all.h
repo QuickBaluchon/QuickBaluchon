@@ -19,6 +19,7 @@ typedef struct PkgInputs {
   GtkWidget *length;
   GtkWidget *height;
   GtkWidget *width ;
+  GtkWidget *nameRecipient ;
   GtkWidget *emailRecipient ;
   GtkWidget *addressRecipient;
   GtkWidget *delay ;
@@ -30,6 +31,7 @@ typedef struct PkgData {
   double height;
   double width ;
   char emailRecipient[30] ;
+  char nameRecipient[100] ;
   char addressRecipient[100];
   uint8_t delay ;
 } PkgData ;

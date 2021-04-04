@@ -111,6 +111,7 @@ uint8_t writeData (char *fileName, PkgData *pkgData, uint8_t totalPkg) {
                 xlSheetWriteStr(sheet, row, 4, pkgData[row-1].emailRecipient, 0);
                 xlSheetWriteStr(sheet, row, 5, pkgData[row-1].addressRecipient, 0);
                 xlSheetWriteNum(sheet, row, 6, pkgData[row-1].delay, 0);
+                xlSheetWriteStr(sheet, row, 7, pkgData[row-1].nameRecipient, 0);
             }
         }
     }
@@ -134,8 +135,8 @@ SheetHandle worksheet : worksheet in use
 
 */
 void writeLabels (SheetHandle worksheet) {
-    char cols[7][30] = {"weight", "length", "height", "width", "Recipient's mail", "Recipient's address", "Delay"};
-    for (int i = 0 ; i < 7 ; ++i)
+    char cols[8][30] = {"weight", "length", "height", "width", "Recipient's mail", "Recipient's address", "Delay", "name"};
+    for (int i = 0 ; i < 8 ; ++i)
         xlSheetWriteStr(worksheet, 0, i, cols[i], 0) ;
 }
 

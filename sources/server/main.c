@@ -18,6 +18,7 @@ typedef struct Data {
   double length;
   double height;
   double width ;
+  char nameRecipient[100];
   char emailRecipient[30] ;
   char addressRecipient[100];
   uint8_t delay ;
@@ -68,6 +69,7 @@ void readData (char **argv) {
                     strcpy(datas[lin-1].emailRecipient, xlSheetReadStr(sheet, lin, 4, 0));
                     strcpy(datas[lin-1].addressRecipient, xlSheetReadStr(sheet, lin, 5, 0));
                     datas[lin-1].delay = xlSheetReadNum(sheet, lin, 6, 0);
+                    strcpy(datas[lin-1].nameRecipient, xlSheetReadStr(sheet, lin, 7, 0));
                 }
             }
         }
@@ -104,14 +106,15 @@ uint8_t saveData (Data *datas, char **argv) {
         curl_global_init(CURL_GLOBAL_ALL);
 
         strcpy(insert, "") ;
-        sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client, excelPath) VALUES (%lf, %lf, '%s', '%s', %d, %d, '/%s')",
+        sprintf(insert, "INSERT INTO PACKAGE (weight, volume, address, email, delay, client, excelPath, nameRecipient) VALUES (%lf, %lf, '%s', '%s', %d, %d, '/%s', '%s')",
             datas[i].weight,
             datas[i].length * datas[i].height * datas[i].width,
             datas[i].addressRecipient,
             datas[i].emailRecipient,
             datas[i].delay,
             atoi(argv[2]),
-            argv[1]
+            argv[1],
+            datas[i].nameRecipient
         );
         strcat(strcat(strcpy(json,"{ \"insert\": \""), insert), "\"}");
 

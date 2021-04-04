@@ -474,7 +474,7 @@ Window *w : pointer to the structure containing all the data of the window
 
 */
 void printPkgs (GtkWidget *widget, Window *w) {
-    char cols[7][30] = {"Weight", "Length", "Height", "Width", "Recipient's mail", "Recipient's address", "Delay"};
+    char cols[8][30] = {"Weight", "Length", "Height", "Width", "Recipient's mail", "Recipient's address", "Delay", "name"};
     uint8_t i ;
     GtkWidget *button ;
 
@@ -484,14 +484,14 @@ void printPkgs (GtkWidget *widget, Window *w) {
     gtk_widget_destroy(w->grid) ;
     w->grid = createGrid(w->window) ;
 
-    for (i = 0 ; i < 7 ; ++i)
+    for (i = 0 ; i < 8 ; ++i)
         addLabel(w->grid, 0, i+1, cols[i]) ;
 
     printPkgData(w);
 
     button = gtk_button_new_with_label("Send");
     g_signal_connect(button, "clicked", G_CALLBACK(writeXLSX), w);
-    gtk_grid_attach(GTK_GRID(w->grid), button, 8, w->totalPkg + 2, 1, 1) ;
+    gtk_grid_attach(GTK_GRID(w->grid), button, 9, w->totalPkg + 2, 1, 1) ;
 
     gtk_widget_show_all(w->window) ;
 }
@@ -546,8 +546,10 @@ void printPkgData (Window *w) {
         sprintf(str, "%d", w->pkgData[i].delay) ;
         addLabel(w->grid, i+1, 7, str) ;
 
+        addLabel(w->grid, i+1, 8, w->pkgData[i].nameRecipient) ;
+
         button[i] = gtk_button_new_with_label("modify");
-        gtk_grid_attach(GTK_GRID(w->grid), button[i], 8, i+1, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(w->grid), button[i], 9, i+1, 1, 1) ;
         g_signal_connect(button[i], "clicked", G_CALLBACK(modifyPkgData), &(modify[i].select));
     }
 }
@@ -634,6 +636,9 @@ void getPkgValues (Window *w, uint8_t i) {
     strcpy(strl, w->pkgData[i].addressRecipient) ;
     gtk_entry_set_text(GTK_ENTRY(inputs->addressRecipient), strl) ;
 
+    strcpy(strl, w->pkgData[i].nameRecipient) ;
+    gtk_entry_set_text(GTK_ENTRY(inputs->nameRecipient), strl) ;
+
     if (w->pkgData[i].delay == 2)
         gtk_combo_box_set_active_id(GTK_COMBO_BOX(inputs->delay), "2d") ;
     else
@@ -663,6 +668,7 @@ PkgInputs * createPkgInputs (GtkWidget *grid) {
     inputs->width = createInput("Width", grid, 3, 1) ;
     inputs->emailRecipient = createInput("Recipient's email", grid, 0, 2) ;
     inputs->addressRecipient = createInput("Recipient address", grid, 1, 2) ;
+    inputs->nameRecipient = createInput("Recipient's name", grid, 3, 2) ;
 
     inputs->delay = gtk_combo_box_text_new() ;
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(inputs->delay), "2d", "2 days") ;
@@ -712,6 +718,13 @@ void getDataPkg (GtkWidget *widget, Window *w) {
         return ;
     }
     strcpy(pkgData->addressRecipient, str);
+
+    retrieveData(widget, inputs->nameRecipient, &str);
+    if (strlen(str) == 0) {
+        printMessage(widget, "Empty name") ;
+        return ;
+    }
+    strcpy(pkgData->nameRecipient, str);
 
     retrieveComboBoxContent(widget, inputs->delay, &str) ;
     if (str == NULL) {
