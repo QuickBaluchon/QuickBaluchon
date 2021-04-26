@@ -130,7 +130,7 @@ uint8_t saveData (Data *datas, char **argv) {
           curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
 
           /* what URL that receives this POST */
-          curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/api/package/");
+          curl_easy_setopt(curl, CURLOPT_URL, "https://quickbaluchon.ovh/api/package/");
           //curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
 
