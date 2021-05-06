@@ -3,7 +3,6 @@ CFLAGS = -Wall `pkg-config --cflags gtk+-3.0` -o
 
 #Libraries
 LIB_CURL = -l curl
-LIB_EXWR = -l xlsxwriter
 LIB_XL = -I../libraries/libxl/include_c -L../libraries/libxl/lib -lxl
 LIBS = `pkg-config --libs gtk+-3.0`
 ALL_LIBS = $(LIBS) $(LIB_CURL) $(LIB_XL) $(LIB_EXWR)

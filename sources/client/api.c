@@ -1,6 +1,9 @@
 #include "all.h"
 
 int idUser = 0 ;
+char *urlOVH = "https://quickbaluchon.ovh/package/%d";
+char *urlAPILogin = "https://quickbaluchon.ovh/api/client/login";
+char *urlAPIExcel = "https://quickbaluchon.ovh/client/excel/%d/%d" ;
 
 /*
 Function : saveID
@@ -62,7 +65,7 @@ void readPkgNumber (char *str, size_t size, size_t nmemb, void *stream) {
         sscanf(tmp, "\"%d\"", &nb) ;
         tokArrow = strstr(tokArrow + 4, " => ") ;
 
-        sprintf(qrURL, "http://quick-baluchon.herokuapp.com/package/%d", nb) ;
+        sprintf(qrURL, urlOVH, nb) ;
         if(createQRcode(qrURL, nb)) {   // createQRcode returns 0 if success
           printMessage(NULL, "Unable to create the QrCode") ;
           return;
@@ -108,7 +111,7 @@ uint8_t connectAPI (char *name, char *pwd) {
       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
 
       /* what URL that receives this POST */
-      curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8888/api/client/login");
+      curl_easy_setopt(curl, CURLOPT_URL, urlAPILogin);
       //curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
       /* Store the result of the query */
@@ -169,7 +172,7 @@ uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
 
     /* what URL that receives this POST */
-    sprintf(url, "http://localhost:8888/api/client/excel/%d/%d", idUser, totalPkg) ;
+    sprintf(url, urlAPIExcel, idUser, totalPkg) ;
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* Store the result of the query */
