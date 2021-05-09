@@ -3,7 +3,7 @@
 int idUser = 0 ;
 char *urlOVH = "https://quickbaluchon.ovh/package/%d";
 char *urlAPILogin = "https://quickbaluchon.ovh/api/client/login";
-char *urlAPIExcel = "https://quickbaluchon.ovh/client/excel/%d/%d" ;
+char *urlAPIExcel = "https://quickbaluchon.ovh/api/client/excel/%d/%d" ;
 
 /*
 Function : saveID
