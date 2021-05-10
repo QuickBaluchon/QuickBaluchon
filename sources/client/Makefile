@@ -32,6 +32,9 @@ app: program
 	cp hedwigeSH $(APP)/Contents/MacOS/$(APP)
 	cp -r ../libraries $(APP)/Contents/MacOS/
 	chmod +x $(APP)/Contents/MacOS/hedwige
+
 	mkdir $(APP)/qrCodes $(APP)/Excel $(APP)/Contents/Resources
-	cp ~/Desktop/hedwige.icns $(APP)/Contents/Resources/$(APP).icns
+	cp hedwige.icns $(APP)/Contents/Resources/$(APP).icns
+	cp Info.plist $(APP)/Contents
 	mv $(APP) $(APP).app
+	killall Finder

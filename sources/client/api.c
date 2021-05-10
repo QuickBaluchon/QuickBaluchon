@@ -3,7 +3,7 @@
 int idUser = 0 ;
 char *urlOVH = "https://quickbaluchon.ovh/package/%d";
 char *urlAPILogin = "https://quickbaluchon.ovh/api/client/login";
-char *urlAPIExcel = "https://quickbaluchon.ovh/client/excel/%d/%d" ;
+char *urlAPIExcel = "https://quickbaluchon.ovh/api/client/excel/%d/%d" ;
 
 /*
 Function : saveID
@@ -51,6 +51,7 @@ void *stream : stream to write the data into (stdout if none specified)
 
 */
 void readPkgNumber (char *str, size_t size, size_t nmemb, void *stream) {
+    printf("%s\n",str) ;
     char qrURL[100] ;
     char *tokArrow ;
     char *tokLineBreak ;
@@ -145,18 +146,18 @@ Return values
     0 if all went well
     the curl error code if an error occured
 */
-uint8_t uploadExcel (char *fileName, uint8_t totalPkg) {
+uint8_t uploadExcel (char *fileName, uint8_t totalPkg){
   CURL *curl;
   CURLcode res;
-  char url[100] = "" ;
+  char url[100] = "";
 
   curl_mime *form = NULL;
   curl_mimepart *field = NULL;
   struct curl_slist *headerlist = NULL;
 
   curl_global_init(CURL_GLOBAL_ALL);
-
   curl = curl_easy_init();
+
   if(curl) {
     /* Create the form */
     form = curl_mime_init(curl);
