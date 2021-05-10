@@ -23,14 +23,15 @@ libxl.dylib:
 	cp ../libraries/libxl/lib/libxl.dylib ./
 
 APP = hedwige
-app: 
-	program
+app: program
 	rm -fr $(APP)
+	rm -fr $(APP).app
 	mkdir -p $(APP)/Contents/MacOS/exe
 	cp main $(APP)/Contents/MacOS/exe
 	cp libxl.dylib $(APP)/Contents/MacOS/exe
-	mkdir $(APP)/qrCodes $(APP)/Excel $(APP)/Ressources
 	cp hedwigeSH $(APP)/Contents/MacOS/$(APP)
 	cp -r ../libraries $(APP)/Contents/MacOS/
 	chmod +x $(APP)/Contents/MacOS/hedwige
+	mkdir $(APP)/qrCodes $(APP)/Excel $(APP)/Contents/Resources
+	cp ~/Desktop/hedwige.icns $(APP)/Contents/Resources/$(APP).icns
 	mv $(APP) $(APP).app
