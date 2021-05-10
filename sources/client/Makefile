@@ -21,3 +21,20 @@ program: libxl.dylib
 
 libxl.dylib:
 	cp ../libraries/libxl/lib/libxl.dylib ./
+
+APP = hedwige
+app: program
+	rm -fr $(APP)
+	rm -fr $(APP).app
+	mkdir -p $(APP)/Contents/MacOS/exe
+	cp main $(APP)/Contents/MacOS/exe
+	cp libxl.dylib $(APP)/Contents/MacOS/exe
+	cp hedwigeSH $(APP)/Contents/MacOS/$(APP)
+	cp -r ../libraries $(APP)/Contents/MacOS/
+	chmod +x $(APP)/Contents/MacOS/hedwige
+
+	mkdir $(APP)/qrCodes $(APP)/Excel $(APP)/Contents/Resources
+	cp hedwige.icns $(APP)/Contents/Resources/$(APP).icns
+	cp Info.plist $(APP)/Contents
+	mv $(APP) $(APP).app
+	killall Finder

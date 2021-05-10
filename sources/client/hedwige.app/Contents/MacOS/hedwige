@@ -1,0 +1,10 @@
+#!/bin/bash
+#get the directy name of the 
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+#change the name of the dependency libxl.dylib by its absolute path
+LIB=`echo ${DIR}/exe/libxl.dylib`
+install_name_tool -change libxl.dylib ${LIB} ${DIR}/exe/main
+
+#execute the binary
+${DIR}/exe/main
